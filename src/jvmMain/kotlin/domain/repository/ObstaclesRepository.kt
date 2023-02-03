@@ -1,7 +1,7 @@
 package domain.repository
 
-import domain.model.Obstacles
+import domain.model.Obstacle
 
 interface ObstaclesRepository {
-    fun getAllObstacles(): List<Obstacles>
+    fun getAllObstacles(): List<Obstacle>
 }
