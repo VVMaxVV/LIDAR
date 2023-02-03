@@ -17,7 +17,7 @@ internal class ObstaclesFactory {
                 Obstacle(
                     listOf(
                         Line(
-                            Point(-10, 10),
+                            Point(-10, -10),
                             Point(-10, 20)
                         ),
                         Line(
@@ -26,11 +26,15 @@ internal class ObstaclesFactory {
                         ),
                         Line(
                             Point(10, 20),
-                            Point(10, 10)
+                            Point(10, -10)
                         ),
                         Line(
-                            Point(10, 10),
-                            Point(-10, 10)
+                            Point(10, -10),
+                            Point(-10, -10)
+                        ),
+                        Line(
+                            Point(-10, 7),
+                            Point(6, 7)
                         )
                     )
                 )
@@ -51,10 +55,16 @@ internal class ObstaclesFactory {
     fun get(topLeftPoint: Point, bottomRightPoint: Point): List<Line> {
         val listLines = mutableSetOf<Line>()
         for (
-        y in minOf(topLeftPoint.getChunk().y, bottomRightPoint.getChunk().y)..maxOf(topLeftPoint.getChunk().y, bottomRightPoint.getChunk().y)
+        y in minOf(topLeftPoint.getChunk().y, bottomRightPoint.getChunk().y)..maxOf(
+            topLeftPoint.getChunk().y,
+            bottomRightPoint.getChunk().y
+        )
         ) {
             for (
-            x in minOf(topLeftPoint.getChunk().x, bottomRightPoint.getChunk().x)..maxOf(topLeftPoint.getChunk().x, bottomRightPoint.getChunk().x)
+            x in minOf(topLeftPoint.getChunk().x, bottomRightPoint.getChunk().x)..maxOf(
+                topLeftPoint.getChunk().x,
+                bottomRightPoint.getChunk().x
+            )
             ) {
                 mapObstacle[Chunk(x, y)]?.let { listLines.addAll(it) }
             }
