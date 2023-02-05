@@ -10,17 +10,18 @@ import presener.di.uiModule
 import presener.ui.MainWindow
 
 fun main() = application {
+    uploadModules()
+    Window(onCloseRequest = ::exitApplication) {
+        (get(MainWindow::class.java) as MainWindow).start()
+    }
+}
+
+private fun uploadModules() {
     startKoin {
         modules(
             uiModule,
             factoryModule,
             repositoryModule
         )
-    }
-
-    val mainWindow: MainWindow = get(MainWindow::class.java)
-
-    Window(onCloseRequest = ::exitApplication) {
-        mainWindow.start()
     }
 }

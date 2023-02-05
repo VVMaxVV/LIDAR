@@ -16,7 +16,7 @@ import androidx.constraintlayout.compose.ConstraintLayoutScope
 
 const val RAYS_NUMBER = 16
 
-internal class LidarCanvas {
+internal class CanvasLidar {
 
     @Preview
     @Composable
@@ -27,7 +27,6 @@ internal class LidarCanvas {
         }
     }
 
-    @Preview
     @Composable
     private fun ConstraintLayoutScope.printCanvas(canvasReference: ConstrainedLayoutReference) {
         Canvas(
