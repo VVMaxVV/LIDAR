@@ -27,15 +27,15 @@ internal class CanvasLidar {
     @Composable
     fun display() {
         ConstraintLayout {
-            val (canvasReference, scaleColumReference) = createRefs()
-            printCanvas(canvasReference, scaleColumReference)
+            val (canvasReference, columLabelsScaleReference) = createRefs()
+            printCanvas(canvasReference, columLabelsScaleReference)
         }
     }
 
     @Composable
     private fun ConstraintLayoutScope.printCanvas(
         canvasReference: ConstrainedLayoutReference,
-        scaleColumReference: ConstrainedLayoutReference
+        columLabelsScaleReference: ConstrainedLayoutReference
     ) {
         Canvas(
             Modifier.constrainAs(canvasReference) {
@@ -50,14 +50,13 @@ internal class CanvasLidar {
             printScaleLine()
         }
         Column(
-            Modifier.constrainAs(scaleColumReference) {
-                top.linkTo(canvasReference.top, margin = 12.dp)
-                bottom.linkTo(canvasReference.bottom, margin = 32.dp)
+            Modifier.constrainAs(columLabelsScaleReference) {
+                top.linkTo(canvasReference.top)
+                bottom.linkTo(canvasReference.bottom, margin = 20.dp)
                 end.linkTo(canvasReference.start)
             }
-//                .background(Color.Red),
         ) {
-            printScaleValue()
+            printLabelsScale()
         }
     }
 
@@ -83,12 +82,11 @@ internal class CanvasLidar {
     }
 
     @Composable
-    private fun ColumnScope.printScaleValue() {
+    private fun ColumnScope.printLabelsScale() {
         Text(
             text = "45\n40\n35\n30\n25\n20\n15\n10\n 5\n 0",
             Modifier.padding(end = 10.dp),
             lineHeight = 44.sp,
         )
     }
-
 }
