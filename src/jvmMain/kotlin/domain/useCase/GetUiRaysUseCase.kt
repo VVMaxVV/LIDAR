@@ -1,8 +1,8 @@
 package domain.useCase
 
-import domain.model.DetailsLidarSector
+import domain.model.LidarConfiguration
 import domain.model.Ray
 
 interface GetUiRaysUseCase {
-    fun execute(detailsLidarSector: DetailsLidarSector): List<Ray>
+    fun execute(lidarConfiguration: LidarConfiguration): List<Ray>
 }

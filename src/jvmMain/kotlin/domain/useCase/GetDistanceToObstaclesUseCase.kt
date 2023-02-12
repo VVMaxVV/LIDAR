@@ -1,12 +1,12 @@
 package domain.useCase
 
+import domain.model.LidarConfiguration
 import domain.model.Point
-import domain.model.RaysConfiguration
 
 interface GetDistanceToObstaclesUseCase {
     fun execute(
         currentPosition: Point,
         currentAngleInDegrees: Number,
-        raysConfiguration: RaysConfiguration
+        raysConfiguration: LidarConfiguration
     ): List<Number>
 }

@@ -3,7 +3,7 @@ package presenter.viewModel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Size
-import domain.model.DetailsLidarSector
+import domain.model.LidarConfiguration
 import domain.model.Ray
 import domain.useCase.GetUiRaysUseCase
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +20,7 @@ internal class RayCalculationViewModel(
     fun getRays(numbersOfRay: Int, horizontalFov: Number, maxRayLength: Number, viewSize: Size) {
         CoroutineScope(Dispatchers.Default).launch {
             getUiRaysUseCase.execute(
-                DetailsLidarSector(numbersOfRay, horizontalFov, maxRayLength)
+                LidarConfiguration(numbersOfRay, horizontalFov, maxRayLength)
             ).also { rayList ->
                 _rayList.value = rayMapper.toCanvasLines(rayList, viewSize)
             }

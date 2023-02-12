@@ -1,7 +1,7 @@
 package data.factory
 
 import androidx.compose.ui.geometry.Offset
-import domain.model.DetailsLidarSector
+import domain.model.LidarConfiguration
 import domain.model.Ray
 import domain.utils.div
 import domain.utils.toRadians
@@ -9,31 +9,18 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 internal class UiRaysFactory {
-    fun get(detailsLidarSector: DetailsLidarSector): List<Ray> {
+    fun get(lidarConfiguration: LidarConfiguration): List<Ray> {
         val coordinatesList = mutableListOf<Ray>()
         val startDestinationDegree =
-            detailsLidarSector.horizontalFov / 2 - detailsLidarSector.horizontalFov / (detailsLidarSector.numbersOfRay * 2)
-        for (rayNumber in 0 until detailsLidarSector.numbersOfRay / 2) {
+            lidarConfiguration.horizontalFov / 2 - lidarConfiguration.horizontalFov /
+                    (lidarConfiguration.numbersOfRay * 2)
+        for (rayNumber in 0 until lidarConfiguration.numbersOfRay) {
             coordinatesList.add(
                 Ray(
                     start = Offset(0f, 0f),
                     end = Offset(
-                        getX((90 - startDestinationDegree) + 3 * rayNumber, detailsLidarSector.maxLength).toFloat(),
-                        getY((90 - startDestinationDegree) + 3 * rayNumber, detailsLidarSector.maxLength).toFloat()
-                    )
-                )
-            )
-        }
-        coordinatesList.take(detailsLidarSector.numbersOfRay / 2).asReversed().map {
-            coordinatesList.add(
-                Ray(
-                    start = Offset(
-                        it.start.x,
-                        it.start.y
-                    ),
-                    end = Offset(
-                        x = it.end.x.times(-1),
-                        y = it.end.y
+                        getX((90 - startDestinationDegree) + 3 * rayNumber, lidarConfiguration.maxLength).toFloat(),
+                        getY((90 - startDestinationDegree) + 3 * rayNumber, lidarConfiguration.maxLength).toFloat()
                     )
                 )
             )
