@@ -1,13 +1,16 @@
-package presener
+package presenter
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import data.di.factoryModule
 import data.di.repositoryModule
+import domain.di.useCaseModule
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.get
-import presener.di.uiModule
-import presener.ui.MainWindow
+import presenter.di.mapperModule
+import presenter.di.uiModule
+import presenter.di.viewModelModule
+import presenter.ui.MainWindow
 
 fun main() = application {
     uploadModules()
@@ -21,7 +24,10 @@ private fun uploadModules() {
         modules(
             uiModule,
             factoryModule,
-            repositoryModule
+            repositoryModule,
+            viewModelModule,
+            useCaseModule,
+            mapperModule
         )
     }
 }

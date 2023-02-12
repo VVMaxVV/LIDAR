@@ -1,10 +1,9 @@
-package presener.ui
+package presenter.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
@@ -18,10 +17,14 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
+import presenter.viewModel.RayCalculationViewModel
 
-const val RAYS_NUMBER = 16
+private const val RAYS_NUMBER = 16
+private const val RAYS_HORIZONTAL_FOV = 48
+private const val MAX_RAY_LENGTH = 45
+private val RAYS_COLOR = Color.White
 
-internal class CanvasLidar {
+internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationViewModel) {
 
     @Preview
     @Composable
@@ -61,11 +64,12 @@ internal class CanvasLidar {
     }
 
     private fun DrawScope.printRays() {
-        for (i in 0 until RAYS_NUMBER) {
+        rayCalculationViewModel.getRays(RAYS_NUMBER, RAYS_HORIZONTAL_FOV, MAX_RAY_LENGTH, size)
+        rayCalculationViewModel.rayList.value.map {
             drawLine(
-                start = Offset(x = size.width / (RAYS_NUMBER - 1) * i, y = 0f),
-                end = Offset(x = size.width / 2, y = size.height),
-                color = Color.White
+                start = it.start,
+                end = it.end,
+                color = RAYS_COLOR,
             )
         }
     }
@@ -82,7 +86,7 @@ internal class CanvasLidar {
     }
 
     @Composable
-    private fun ColumnScope.printLabelsScale() {
+    private fun printLabelsScale() {
         Text(
             text = "45\n40\n35\n30\n25\n20\n15\n10\n 5\n 0",
             Modifier.padding(end = 10.dp),

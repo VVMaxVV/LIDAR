@@ -1,8 +1,12 @@
 package domain.useCase
 
 import domain.model.Point
-import domain.model.RayConfiguration
+import domain.model.RaysConfiguration
 
 interface GetDistanceToObstaclesUseCase {
-    fun execute(currentPosition: Point, currentAngleInDegrees: Number, rayConfiguration: RayConfiguration): List<Number>
+    fun execute(
+        currentPosition: Point,
+        currentAngleInDegrees: Number,
+        raysConfiguration: RaysConfiguration
+    ): List<Number>
 }
