@@ -14,13 +14,20 @@ internal class UiRaysFactory {
         val startDestinationDegree =
             lidarConfiguration.horizontalFov / 2 - lidarConfiguration.horizontalFov /
                     (lidarConfiguration.numbersOfRay * 2)
+        val degreeDivision = lidarConfiguration.horizontalFov / lidarConfiguration.numbersOfRay
         for (rayNumber in 0 until lidarConfiguration.numbersOfRay) {
             coordinatesList.add(
                 Ray(
                     start = Offset(0f, 0f),
                     end = Offset(
-                        getX((90 - startDestinationDegree) + 3 * rayNumber, lidarConfiguration.maxLength).toFloat(),
-                        getY((90 - startDestinationDegree) + 3 * rayNumber, lidarConfiguration.maxLength).toFloat()
+                        getX(
+                            (90 - startDestinationDegree) + degreeDivision * rayNumber,
+                            lidarConfiguration.maxLength
+                        ).toFloat(),
+                        getY(
+                            (90 - startDestinationDegree) + degreeDivision * rayNumber,
+                            lidarConfiguration.maxLength
+                        ).toFloat()
                     )
                 )
             )
