@@ -1,10 +1,11 @@
 package data.repository
 
-import data.factory.UiRaysFactory
-import domain.model.LidarConfiguration
+import data.factory.RaysFactory
 import domain.model.Ray
+import domain.model.RayTracingConfiguration
 import domain.repository.UiRepository
 
-internal class UiRepositoryImpl(private val raysFactory: UiRaysFactory) : UiRepository {
-    override fun getLidarUiRays(lidarConfiguration: LidarConfiguration): List<Ray> = raysFactory.get(lidarConfiguration)
+internal class UiRepositoryImpl(private val raysFactory: RaysFactory) : UiRepository {
+    override fun getLidarUiRays(rayTracingConfiguration: RayTracingConfiguration): List<Ray> =
+        raysFactory.get(rayTracingConfiguration)
 }
