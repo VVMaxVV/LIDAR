@@ -1,8 +1,8 @@
 package domain.repository
 
-import domain.model.LidarConfiguration
 import domain.model.Ray
+import domain.model.RayTracingConfiguration
 
 interface UiRepository {
-    fun getLidarUiRays(lidarConfiguration: LidarConfiguration): List<Ray>
+    fun getLidarUiRays(rayTracingConfiguration: RayTracingConfiguration): List<Ray>
 }
