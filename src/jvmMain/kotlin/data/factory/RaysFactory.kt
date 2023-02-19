@@ -35,7 +35,6 @@ internal class RaysFactory {
                             rayTracingConfiguration.maxLength,
                             (90 - startDestinationDegree + currentPosition.currentTiltAngle.getAngleOnXPlane)
                                     + degreeDivision * rayNumber,
-
                             currentPosition.currentCoordinates.y
                         )
                     )

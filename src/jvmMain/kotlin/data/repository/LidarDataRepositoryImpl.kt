@@ -2,10 +2,7 @@ package data.repository
 
 import androidx.compose.ui.geometry.Offset
 import data.factory.RaysFactory
-import domain.model.DistanceToCollision
-import domain.model.Position
-import domain.model.Ray
-import domain.model.RayTracingConfiguration
+import domain.model.*
 import domain.repository.LidarDataRepository
 import domain.repository.ObstaclesRepository
 import domain.utils.compareTo
@@ -25,36 +22,11 @@ internal class LidarDataRepositoryImpl(
             _position?.let { position ->
                 val obstacleList = obstacleRepositoryImpl.getAllObstacles()
                 raysFactory.get(configuration, position).forEach { ray ->
-                    val allIntersectionDistanceForRay = mutableListOf<Number?>()
-                    obstacleList.map { obstacle ->
-                        obstacle.listOfCoordinates.mapIndexed { index, point ->
-                            if (index + 1 < obstacle.listOfCoordinates.size) {
-                                val nextPoint = obstacle.listOfCoordinates[index + 1]
-                                getDistanceToIntersection(
-                                    ray,
-                                    Ray(
-                                        Offset(point.x.toFloat(), point.y.toFloat()),
-                                        Offset(
-                                            nextPoint.x.toFloat(),
-                                            nextPoint.y.toFloat()
-                                        )
-                                    )
-                                ).also {
-                                    allIntersectionDistanceForRay.add(it)
-                                }
-                            }
+                    getDistanceToAllIntersectionForRay(ray, obstacleList).also { allIntersectionDistanceForRay ->
+                        getDistanceToNearestObstacle(allIntersectionDistanceForRay, configuration.maxLength).also {
+                            distanceToIntersection.add(it)
                         }
                     }
-                    if (allIntersectionDistanceForRay.filterNotNull().isNotEmpty())
-                        allIntersectionDistanceForRay.filterNotNull().minBy { it.toFloat() }.also {
-                            if (it < configuration.maxLength) distanceToIntersection.add(
-                                DistanceToCollision.WithinMeasurement(
-                                    it
-                                )
-                            )
-                            else distanceToIntersection.add(DistanceToCollision.OutOfBound)
-                        }
-                    else distanceToIntersection.add(DistanceToCollision.OutOfBound)
                 }
             }
         }
@@ -67,5 +39,40 @@ internal class LidarDataRepositoryImpl(
 
     override fun setCurrentPosition(currentPosition: Position) {
         _position = currentPosition
+    }
+
+    private fun getDistanceToAllIntersectionForRay(ray: Ray, obstaclesList: List<Obstacle>): List<Number?> {
+        val allIntersectionDistanceForRay = mutableListOf<Number?>()
+        obstaclesList.map { obstacle ->
+            obstacle.listOfCoordinates.mapIndexed { index, point ->
+                if (index + 1 < obstacle.listOfCoordinates.size) {
+                    val nextPoint = obstacle.listOfCoordinates[index + 1]
+                    getDistanceToIntersection(
+                        ray,
+                        Ray(
+                            Offset(point.x.toFloat(), point.y.toFloat()),
+                            Offset(
+                                nextPoint.x.toFloat(),
+                                nextPoint.y.toFloat()
+                            )
+                        )
+                    ).also {
+                        allIntersectionDistanceForRay.add(it)
+                    }
+                }
+            }
+        }
+        return allIntersectionDistanceForRay
+    }
+
+    private fun getDistanceToNearestObstacle(
+        allIntersectionDistanceForRay: List<Number?>,
+        maxLength: Number
+    ): DistanceToCollision {
+        if (allIntersectionDistanceForRay.filterNotNull().isNotEmpty())
+            allIntersectionDistanceForRay.filterNotNull().minBy { it.toFloat() }.also {
+                if (it < maxLength) return DistanceToCollision.WithinMeasurement(it)
+            }
+        return DistanceToCollision.OutOfBound
     }
 }

@@ -12,20 +12,18 @@ internal class RayMapper {
         rayList.map { ray ->
             moveOnAxisX(ray, visibleWidth)
             expandOnAxisY(ray, visibleHeight)
+            scaleToViewSize(
+                ray,
+                viewSize.width / visibleWidth.times(2),
+                viewSize.height / visibleHeight
+            )
         }
-
-        return scaleToViewSize(
-            rayList,
-            viewSize.width / visibleWidth.times(2),
-            viewSize.height / visibleHeight
-        )
+        return rayList
     }
 
-    private fun scaleToViewSize(rayList: List<Ray>, scaleX: Number, scaleY: Number): List<Ray> {
-        return rayList.map { ray ->
-            ray.scaleStart(scaleX, scaleY)
-            ray.scaleEnd(scaleX, scaleY)
-        }
+    private fun scaleToViewSize(ray: Ray, scaleX: Number, scaleY: Number) {
+        ray.scaleStart(scaleX, scaleY)
+        ray.scaleEnd(scaleX, scaleY)
     }
 
     private fun expandOnAxisY(ray: Ray, turningHeight: Number) {

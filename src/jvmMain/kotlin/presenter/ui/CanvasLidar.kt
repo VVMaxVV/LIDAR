@@ -63,7 +63,7 @@ internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationVi
             )
             printRays()
             printScaleLine()
-            printPoints()
+            printIntersectionsPoints()
         }
         Column(
             Modifier.constrainAs(columLabelsScaleReference) {
@@ -94,7 +94,7 @@ internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationVi
         }
     }
 
-    private fun DrawScope.printPoints() {
+    private fun DrawScope.printIntersectionsPoints() {
         rayCalculationViewModel.pointList.value.let { pointList ->
             drawPoints(
                 points = pointList,

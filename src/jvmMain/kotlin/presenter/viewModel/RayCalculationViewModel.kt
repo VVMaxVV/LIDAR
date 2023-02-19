@@ -9,7 +9,7 @@ import domain.model.Ray
 import domain.model.RayTracingConfiguration
 import domain.useCase.GetDistanceToCollisionUseCase
 import domain.useCase.GetUiRaysUseCase
-import domain.useCase.SetupLidarConfigurationUseCase
+import domain.useCase.SetupRayTracingConfigurationUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ import presenter.mapper.RayMapper
 
 internal class RayCalculationViewModel(
     private val getUiRaysUseCase: GetUiRaysUseCase,
-    private val setupLidarConfigurationUseCase: SetupLidarConfigurationUseCase,
+    private val setupRayTracingConfigurationUseCase: SetupRayTracingConfigurationUseCase,
     private val getDistanceToCollisionUseCase: GetDistanceToCollisionUseCase,
     private val rayMapper: RayMapper,
     private val distanceToCollisionMapper: DistanceToCollisionMapper
@@ -35,7 +35,7 @@ internal class RayCalculationViewModel(
         maxRayLength: Number,
         currentPosition: Position
     ) {
-        setupLidarConfigurationUseCase.execute(
+        setupRayTracingConfigurationUseCase.execute(
             rayTracingConfiguration = RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength),
             currentPosition = currentPosition
         )
@@ -46,22 +46,22 @@ internal class RayCalculationViewModel(
         horizontalFov: Number,
         maxRayLength: Number,
         viewSize: Size,
-        uiLengthVisibility: Number,
-        uiWidthVisibility: Number
+        visibilityInLength: Number,
+        visibilityInWidth: Number
     ) {
         CoroutineScope(Dispatchers.Default).launch {
             val rayTracingConfiguration = RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength)
             getUiRaysUseCase.execute(
                 rayTracingConfiguration
             ).also { rayList ->
-                _rayList.value = rayMapper.toView(rayList, uiLengthVisibility, uiWidthVisibility, viewSize)
+                _rayList.value = rayMapper.toView(rayList, visibilityInLength, visibilityInWidth, viewSize)
             }
             getDistanceToCollisionUseCase.execute().also {
                 _pointList.value =
                     distanceToCollisionMapper.toOffsetsOnView(
                         it,
-                        uiLengthVisibility,
-                        uiWidthVisibility,
+                        visibilityInLength,
+                        visibilityInWidth,
                         rayTracingConfiguration,
                         viewSize
                     )
