@@ -11,18 +11,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
+import domain.model.Point
+import domain.model.Position
+import domain.model.TiltAngle
 import presenter.viewModel.RayCalculationViewModel
 
 private const val RAYS_NUMBER = 16
 private const val RAYS_HORIZONTAL_FOV = 48
 private const val MAX_RAY_LENGTH = 45
-private val RAYS_COLOR = Color.White
+private const val VISIBILITY_HEIGHT = 45
+private const val VISIBILITY_WIDTH = 20
+private const val COLLISION_POINTS_WIDTH = 3f
+private val currentPosition = Position(Point(x = 0f, y = -10f), TiltAngle(20))
+private val raysColor = Color.White
+private val collisionPointsColor = Color.Green
 
 internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationViewModel) {
 
@@ -49,8 +58,12 @@ internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationVi
                 .background(Color.Black)
                 .padding(vertical = 12.dp)
         ) {
+            rayCalculationViewModel.setupLidarConfiguration(
+                RAYS_NUMBER, RAYS_HORIZONTAL_FOV, MAX_RAY_LENGTH, currentPosition
+            )
             printRays()
             printScaleLine()
+            printIntersectionsPoints()
         }
         Column(
             Modifier.constrainAs(columLabelsScaleReference) {
@@ -64,13 +77,32 @@ internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationVi
     }
 
     private fun DrawScope.printRays() {
-        rayCalculationViewModel.getRays(RAYS_NUMBER, RAYS_HORIZONTAL_FOV, MAX_RAY_LENGTH, size)
+        rayCalculationViewModel.getRays(
+            RAYS_NUMBER,
+            RAYS_HORIZONTAL_FOV,
+            MAX_RAY_LENGTH,
+            size,
+            VISIBILITY_HEIGHT,
+            VISIBILITY_WIDTH
+        )
         rayCalculationViewModel.rayList.value.map {
             drawLine(
                 start = it.start,
                 end = it.end,
-                color = RAYS_COLOR,
+                color = raysColor,
             )
+        }
+    }
+
+    private fun DrawScope.printIntersectionsPoints() {
+        rayCalculationViewModel.pointList.value.let { pointList ->
+            drawPoints(
+                points = pointList,
+                pointMode = PointMode.Points,
+                strokeWidth = COLLISION_POINTS_WIDTH,
+                color = collisionPointsColor
+            )
+
         }
     }
 

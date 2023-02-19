@@ -3,28 +3,27 @@ package presenter.mapper
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import domain.model.Ray
+import domain.utils.div
 import domain.utils.minus
+import domain.utils.times
 
 internal class RayMapper {
-    fun toCanvasLines(rayList: List<Ray>, size: Size): List<Ray> {
-        val offsetX = rayList.maxWith(Comparator.comparing { it.end.x.toDouble() }).end.x
-        val offsetY = rayList.maxWith(Comparator.comparing { it.end.y.toDouble() }).end.y
-        rayList.map {
-            moveOnAxisX(it, offsetX)
-            expandOnAxisY(it, offsetY)
+    fun toView(rayList: List<Ray>, visibleHeight: Number, visibleWidth: Number, viewSize: Size): List<Ray> {
+        rayList.map { ray ->
+            moveOnAxisX(ray, visibleWidth)
+            expandOnAxisY(ray, visibleHeight)
+            scaleToViewSize(
+                ray,
+                viewSize.width / visibleWidth.times(2),
+                viewSize.height / visibleHeight
+            )
         }
-        return scaleToViewSize(rayList, size)
+        return rayList
     }
 
-    private fun scaleToViewSize(rayList: List<Ray>, size: Size): List<Ray> {
-        val offsetX = rayList.maxWith(Comparator.comparing { it.end.x.toDouble() }).end.x
-        val offsetY = rayList.maxWith(Comparator.comparing { it.start.y.toDouble() }).start.y
-        val scaleX = size.width / offsetX
-        val scaleY = size.height / offsetY
-        return rayList.map { ray ->
-            ray.scaleStart(scaleX, scaleY)
-            ray.scaleEnd(scaleX, scaleY)
-        }
+    private fun scaleToViewSize(ray: Ray, scaleX: Number, scaleY: Number) {
+        ray.scaleStart(scaleX, scaleY)
+        ray.scaleEnd(scaleX, scaleY)
     }
 
     private fun expandOnAxisY(ray: Ray, turningHeight: Number) {
