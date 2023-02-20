@@ -4,7 +4,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import domain.model.Position
 import domain.model.Ray
 import domain.model.RayTracingConfiguration
 import domain.useCase.GetDistanceToCollisionUseCase
@@ -32,13 +31,33 @@ internal class RayCalculationViewModel(
     fun setupLidarConfiguration(
         numbersOfRay: Int,
         horizontalFov: Number,
-        maxRayLength: Number,
-        currentPosition: Position
+        maxRayLength: Number
     ) {
         setupRayTracingConfigurationUseCase.execute(
-            rayTracingConfiguration = RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength),
-            currentPosition = currentPosition
+            rayTracingConfiguration = RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength)
         )
+    }
+
+    fun fetchPointsInterception(
+        numbersOfRay: Int,
+        horizontalFov: Number,
+        maxRayLength: Number,
+        viewSize: Size,
+        visibilityInLength: Number,
+        visibilityInWidth: Number
+    ) {
+        CoroutineScope(Dispatchers.Default).launch {
+            getDistanceToCollisionUseCase.execute().also {
+                _pointList.value =
+                    distanceToCollisionMapper.toOffsetsOnView(
+                        it,
+                        visibilityInLength,
+                        visibilityInWidth,
+                        RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength),
+                        viewSize
+                    )
+            }
+        }
     }
 
     fun getRays(
@@ -50,22 +69,16 @@ internal class RayCalculationViewModel(
         visibilityInWidth: Number
     ) {
         CoroutineScope(Dispatchers.Default).launch {
-            val rayTracingConfiguration = RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength)
             getUiRaysUseCase.execute(
-                rayTracingConfiguration
+                RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength)
             ).also { rayList ->
                 _rayList.value = rayMapper.toView(rayList, visibilityInLength, visibilityInWidth, viewSize)
             }
-            getDistanceToCollisionUseCase.execute().also {
-                _pointList.value =
-                    distanceToCollisionMapper.toOffsetsOnView(
-                        it,
-                        visibilityInLength,
-                        visibilityInWidth,
-                        rayTracingConfiguration,
-                        viewSize
-                    )
-            }
+            fetchPointsInterception(
+                numbersOfRay, horizontalFov, maxRayLength,
+                viewSize,
+                visibilityInLength, visibilityInWidth
+            )
         }
     }
 }
