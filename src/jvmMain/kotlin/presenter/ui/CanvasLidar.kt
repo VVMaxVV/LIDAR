@@ -55,7 +55,7 @@ internal class CanvasLidar(
     @Preview
     @Composable
     fun display() {
-        ConstraintLayout() {
+        ConstraintLayout {
             val (canvasReference, columLabelsScaleReference) = createRefs()
             printCanvas(canvasReference, columLabelsScaleReference)
         }
