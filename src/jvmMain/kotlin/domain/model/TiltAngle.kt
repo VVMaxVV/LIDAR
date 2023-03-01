@@ -8,10 +8,10 @@ data class TiltAngle(private var angleOnXPlane: Number = 0) {
         private set
 
     init {
-        angleOnXPlane %= 360
+        getAngleOnXPlane %= 360
     }
 
     fun rotateOnXPlane(angle: Number) {
-        angleOnXPlane = (angleOnXPlane + angle) % 360
+        getAngleOnXPlane = (getAngleOnXPlane + angle) % 360
     }
 }
