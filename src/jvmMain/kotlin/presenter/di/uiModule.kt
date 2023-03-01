@@ -6,5 +6,5 @@ import presenter.ui.MainWindow
 
 val uiModule = module {
     single { MainWindow(get()) }
-    single { CanvasLidar(get()) }
+    single { CanvasLidar(get(), get()) }
 }

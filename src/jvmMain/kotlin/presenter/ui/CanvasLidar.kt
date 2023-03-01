@@ -3,16 +3,27 @@ package presenter.ui
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstrainedLayoutReference
@@ -21,6 +32,7 @@ import androidx.constraintlayout.compose.ConstraintLayoutScope
 import domain.model.Point
 import domain.model.Position
 import domain.model.TiltAngle
+import presenter.viewModel.ControllerMovementsViewModel
 import presenter.viewModel.RayCalculationViewModel
 
 private const val RAYS_NUMBER = 16
@@ -29,11 +41,16 @@ private const val MAX_RAY_LENGTH = 45
 private const val VISIBILITY_HEIGHT = 45
 private const val VISIBILITY_WIDTH = 20
 private const val COLLISION_POINTS_WIDTH = 3f
-private val currentPosition = Position(Point(x = 0f, y = -10f), TiltAngle(20))
+private const val CANVAS_VERTICAL_PADDING = 12f
+private val startPosition = Position(Point(x = 0f, y = 0f), TiltAngle(0))
+private val canvasSize = Size(400f, 420f)
 private val raysColor = Color.White
 private val collisionPointsColor = Color.Green
 
-internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationViewModel) {
+internal class CanvasLidar(
+    private val rayCalculationViewModel: RayCalculationViewModel,
+    private val controllerMovementsViewModel: ControllerMovementsViewModel
+) {
 
     @Preview
     @Composable
@@ -49,17 +66,25 @@ internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationVi
         canvasReference: ConstrainedLayoutReference,
         columLabelsScaleReference: ConstrainedLayoutReference
     ) {
+        val requester = remember { FocusRequester() }
+        LaunchedEffect(Unit) { requester.requestFocus() }
         Canvas(
             Modifier.constrainAs(canvasReference) {
                 top.linkTo(parent.top, margin = 16.dp)
                 start.linkTo(parent.start, margin = 40.dp)
             }
-                .size(400.dp, 420.dp)
+                .size(canvasSize.width.dp, canvasSize.height.dp)
                 .background(Color.Black)
-                .padding(vertical = 12.dp)
+                .padding(vertical = CANVAS_VERTICAL_PADDING.dp)
+                .onKeyEvent {
+                    handleKeyEvent(it)
+                }
+                .focusRequester(requester)
+                .focusable()
         ) {
+            controllerMovementsViewModel.setCurrentPosition(startPosition)
             rayCalculationViewModel.setupLidarConfiguration(
-                RAYS_NUMBER, RAYS_HORIZONTAL_FOV, MAX_RAY_LENGTH, currentPosition
+                RAYS_NUMBER, RAYS_HORIZONTAL_FOV, MAX_RAY_LENGTH
             )
             printRays()
             printScaleLine()
@@ -76,12 +101,54 @@ internal class CanvasLidar(private val rayCalculationViewModel: RayCalculationVi
         }
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
+    private fun handleKeyEvent(keyEvent: KeyEvent): Boolean {
+        when (keyEvent.key) {
+            Key.A -> {
+                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.MoveLeft)
+            }
+
+            Key.D -> {
+                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.MoveRight)
+            }
+
+            Key.W -> {
+                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.MoveForward)
+            }
+
+            Key.S -> {
+                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.MoveBackward)
+            }
+
+            Key.DirectionRight -> {
+                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.RotateClockwise)
+            }
+
+            Key.DirectionLeft -> {
+                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.RotateCounterclockwise)
+            }
+
+            else -> {
+                return false
+            }
+        }
+        rayCalculationViewModel.fetchPointsInterception(
+            RAYS_NUMBER,
+            RAYS_HORIZONTAL_FOV,
+            MAX_RAY_LENGTH,
+            Size(canvasSize.height - CANVAS_VERTICAL_PADDING * 2, canvasSize.width),
+            VISIBILITY_HEIGHT,
+            VISIBILITY_WIDTH
+        )
+        return true
+    }
+
     private fun DrawScope.printRays() {
         rayCalculationViewModel.getRays(
             RAYS_NUMBER,
             RAYS_HORIZONTAL_FOV,
             MAX_RAY_LENGTH,
-            size,
+            Size(canvasSize.height - CANVAS_VERTICAL_PADDING * 2, canvasSize.width),
             VISIBILITY_HEIGHT,
             VISIBILITY_WIDTH
         )

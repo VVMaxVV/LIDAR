@@ -14,6 +14,11 @@ data class Point(var x: Number = 0, var y: Number = 0) {
         y += offset.y
     }
 
+    fun moveTo(offset: Offset) {
+        x = offset.x
+        y = offset.y
+    }
+
     fun scale(scaleX: Number = 1, scaleY: Number = 1) {
         x *= scaleX
         y *= scaleY
