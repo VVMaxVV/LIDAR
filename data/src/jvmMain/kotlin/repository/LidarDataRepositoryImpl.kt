@@ -2,10 +2,13 @@ package repository
 
 import androidx.compose.ui.geometry.Offset
 import factory.RaysFactory
-import model.*
+import model.DistanceToCollision
+import model.Obstacle
+import model.Position
+import model.Ray
+import model.RayTracingConfiguration
 import util.compareTo
 import util.getDistanceToIntersection
-
 
 internal class LidarDataRepositoryImpl(
     private val obstacleRepositoryImpl: ObstaclesRepository,
@@ -67,10 +70,12 @@ internal class LidarDataRepositoryImpl(
         allIntersectionDistanceForRay: List<Number?>,
         maxLength: Number
     ): DistanceToCollision {
-        if (allIntersectionDistanceForRay.filterNotNull().isNotEmpty())
-            allIntersectionDistanceForRay.filterNotNull().minBy { it.toFloat() }.also {
-                if (it < maxLength) return DistanceToCollision.WithinMeasurement(it)
-            }
+        if (allIntersectionDistanceForRay.filterNotNull().isNotEmpty()) {
+            allIntersectionDistanceForRay.filterNotNull().minBy { it.toFloat() }
+                .also {
+                    if (it < maxLength) return DistanceToCollision.WithinMeasurement(it)
+                }
+        }
         return DistanceToCollision.OutOfBound
     }
 }

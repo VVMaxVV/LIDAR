@@ -20,7 +20,7 @@ class DistanceToCollisionMapper(private val pointMapper: PointMapper) {
         val offsetList = mutableListOf<Offset>()
         val startDestinationDegree =
             rayTracingConfiguration.horizontalFov / 2 - rayTracingConfiguration.horizontalFov /
-                    (rayTracingConfiguration.numbersOfRay * 2)
+                (rayTracingConfiguration.numbersOfRay * 2)
         val degreeDivision = rayTracingConfiguration.horizontalFov / rayTracingConfiguration.numbersOfRay
         distanceToCollisionList.mapIndexed { index, distance ->
             (distance as? DistanceToCollision.WithinMeasurement)?.also {
@@ -28,7 +28,10 @@ class DistanceToCollisionMapper(private val pointMapper: PointMapper) {
                     Point(
                         getX(it.distance, (90 - startDestinationDegree) + degreeDivision * index),
                         getY(it.distance, (90 - startDestinationDegree) + degreeDivision * index)
-                    ), visibleHeight, visibleWidth, viewSize
+                    ),
+                    visibleHeight,
+                    visibleWidth,
+                    viewSize
                 ).also {
                     offsetList.add(Offset(it.x.toFloat(), it.y.toFloat()))
                 }
