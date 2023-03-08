@@ -75,9 +75,12 @@ class RayCalculationViewModel(
                 _rayList.value = rayMapper.toView(rayList, visibilityInLength, visibilityInWidth, viewSize)
             }
             fetchPointsInterception(
-                numbersOfRay, horizontalFov, maxRayLength,
+                numbersOfRay,
+                horizontalFov,
+                maxRayLength,
                 viewSize,
-                visibilityInLength, visibilityInWidth
+                visibilityInLength,
+                visibilityInWidth
             )
         }
     }

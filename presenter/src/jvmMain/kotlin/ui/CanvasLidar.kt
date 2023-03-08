@@ -84,7 +84,9 @@ class CanvasLidar(
         ) {
             controllerMovementsViewModel.setCurrentPosition(startPosition)
             rayCalculationViewModel.setupLidarConfiguration(
-                RAYS_NUMBER, RAYS_HORIZONTAL_FOV, MAX_RAY_LENGTH
+                RAYS_NUMBER,
+                RAYS_HORIZONTAL_FOV,
+                MAX_RAY_LENGTH
             )
             printRays()
             printScaleLine()
@@ -156,7 +158,7 @@ class CanvasLidar(
             drawLine(
                 start = it.start,
                 end = it.end,
-                color = raysColor,
+                color = raysColor
             )
         }
     }
@@ -169,7 +171,6 @@ class CanvasLidar(
                 strokeWidth = COLLISION_POINTS_WIDTH,
                 color = collisionPointsColor
             )
-
         }
     }
 
@@ -179,7 +180,7 @@ class CanvasLidar(
             drawLine(
                 start = Offset(x = 0f, y = dpBetweenLine * i),
                 end = Offset(x = -8f, y = dpBetweenLine * i),
-                color = Color.Black,
+                color = Color.Black
             )
         }
     }
@@ -189,7 +190,7 @@ class CanvasLidar(
         Text(
             text = "45\n40\n35\n30\n25\n20\n15\n10\n 5\n 0",
             Modifier.padding(end = 10.dp),
-            lineHeight = 44.sp,
+            lineHeight = 44.sp
         )
     }
 }
