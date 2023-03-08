@@ -3,7 +3,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
-    id("org.jlleitschuh.gradle.ktlint") version "11.3.1" apply false
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 allprojects {
