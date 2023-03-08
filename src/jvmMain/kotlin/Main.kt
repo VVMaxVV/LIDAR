@@ -1,6 +1,8 @@
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import di.*
+import di.dataModule
+import di.domainModule
+import di.presenterModule
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.get
 import ui.MainWindow
@@ -15,12 +17,9 @@ fun main() = application {
 private fun uploadModules() {
     startKoin {
         modules(
-            uiModule,
-            factoryModule,
-            repositoryModule,
-            viewModelModule,
-            useCaseModule,
-            mapperModule
+            dataModule,
+            domainModule,
+            presenterModule
         )
     }
 }
