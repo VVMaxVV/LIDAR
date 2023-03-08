@@ -32,19 +32,23 @@ fun getDistanceToIntersection(firstLine: Ray, secondLine: Ray): Number? =
 fun getPointIntersectionOfLines(firstLine: Ray, secondLine: Ray): Point? {
     val denominator =
         (firstLine.start.x - firstLine.end.x) * (secondLine.start.y - secondLine.end.y) -
-                (firstLine.start.y - firstLine.end.y) * (secondLine.start.x - secondLine.end.x)
+            (firstLine.start.y - firstLine.end.y) * (secondLine.start.x - secondLine.end.x)
     if (denominator == 0f) {
         return null
     }
 
     val t =
-        ((firstLine.start.x - secondLine.start.x) * (secondLine.start.y - secondLine.end.y)
-                - (firstLine.start.y - secondLine.start.y)
-                * (secondLine.start.x - secondLine.end.x)) / denominator
+        (
+            (firstLine.start.x - secondLine.start.x) * (secondLine.start.y - secondLine.end.y) -
+                (firstLine.start.y - secondLine.start.y) *
+                (secondLine.start.x - secondLine.end.x)
+            ) / denominator
     val u =
-        -((firstLine.start.x - firstLine.end.x) * (firstLine.start.y - secondLine.start.y)
-                - (firstLine.start.y - firstLine.end.y)
-                * (firstLine.start.x - secondLine.start.x)) / denominator
+        -(
+            (firstLine.start.x - firstLine.end.x) * (firstLine.start.y - secondLine.start.y) -
+                (firstLine.start.y - firstLine.end.y) *
+                (firstLine.start.x - secondLine.start.x)
+            ) / denominator
 
     if (t in 0f..1f && u in 0f..1f) {
         val x = firstLine.start.x + t * (firstLine.end.x - firstLine.start.x)

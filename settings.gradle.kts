@@ -10,6 +10,7 @@ pluginManagement {
         kotlin("multiplatform").version(extra["kotlin.version"] as String)
         id("org.jetbrains.compose").version(extra["compose.version"] as String)
         id("org.jetbrains.kotlin.jvm") version "1.8.0"
+        id("org.jlleitschuh.gradle.ktlint") version "11.3.1" apply false
     }
 }
 

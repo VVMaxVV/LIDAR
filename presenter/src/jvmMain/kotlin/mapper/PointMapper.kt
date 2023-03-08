@@ -12,7 +12,8 @@ class PointMapper {
         moveOnAxisX(point, visibleWidth)
         expandOnAxisY(point, visibleHeight)
         scaleToViewSize(
-            point, viewSize.width / visibleWidth.times(2),
+            point,
+            viewSize.width / visibleWidth.times(2),
             viewSize.height / visibleHeight
         )
         return point
