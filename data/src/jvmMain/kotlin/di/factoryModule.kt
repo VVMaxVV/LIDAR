@@ -4,7 +4,7 @@ import factory.ObstaclesFactory
 import factory.RaysFactory
 import org.koin.dsl.module
 
-val factoryModule = module {
+internal val factoryModule = module {
     single { ObstaclesFactory() }
     single { RaysFactory() }
 }

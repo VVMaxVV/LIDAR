@@ -10,7 +10,7 @@ import useCase.impl.GetLidarUiRaysUseCaseImpl
 import useCase.impl.SetCurrentPositionUseCaseImpl
 import useCase.impl.SetupRayTracingConfigurationUseCaseImpl
 
-val useCaseModule = module {
+internal val useCaseModule = module {
     single<GetUiRaysUseCase> { GetLidarUiRaysUseCaseImpl(get()) }
     single<GetDistanceToCollisionUseCase> { GetDistanceToCollisionUseCaseImpl(get()) }
     single<SetupRayTracingConfigurationUseCase> { SetupRayTracingConfigurationUseCaseImpl(get()) }
