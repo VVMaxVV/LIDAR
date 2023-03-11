@@ -18,7 +18,14 @@ operator fun Number.times(i: Number) = this.toFloat() * i.toFloat()
 
 operator fun Number.rem(i: Number) = this.toFloat() % i.toFloat()
 
-operator fun Number.compareTo(number: Number): Int = (this - number).toInt()
+operator fun Number.compareTo(number: Number): Int {
+    val result = this - number
+    return when {
+        result < 0 -> -1
+        result == 0f -> 0
+        else -> 1
+    }
+}
 
 fun getX(distance: Number, angle: Number, currentPositionX: Number = 0.0) =
     cos(angle.toDouble().toRadians()) * distance + currentPositionX
