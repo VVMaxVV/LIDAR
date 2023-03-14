@@ -24,5 +24,5 @@ data class Point(var x: Number = 0, var y: Number = 0) {
         y *= scaleY
     }
 
-    fun getDistance(point: Offset) = sqrt(abs(point.x - this.x).pow(2) + abs(point.y - this.y).pow(2))
+    fun getDistance(offset: Offset) = sqrt(abs(offset.x - this.x).pow(2) + abs(offset.y - this.y).pow(2))
 }

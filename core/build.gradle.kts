@@ -19,5 +19,11 @@ kotlin {
                 api("io.insert-koin:koin-core:3.3.2")
             }
         }
+        val jvmTest by getting {
+            dependencies {
+                api("junit:junit:4.13.2")
+                api("io.mockk:mockk:1.13.4")
+            }
+        }
     }
 }
