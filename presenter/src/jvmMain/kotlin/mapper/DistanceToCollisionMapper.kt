@@ -12,8 +12,7 @@ import util.getY
 class DistanceToCollisionMapper(private val pointMapper: PointMapper) {
     fun toOffsetsOnView(
         distanceToCollisionList: List<DistanceToCollision>,
-        visibleHeight: Number,
-        visibleWidth: Number,
+        maxLengthVisibility: Number,
         rayTracingConfiguration: RayTracingConfiguration,
         viewSize: Size
     ): List<Offset> {
@@ -22,6 +21,7 @@ class DistanceToCollisionMapper(private val pointMapper: PointMapper) {
             rayTracingConfiguration.horizontalFov / 2 - rayTracingConfiguration.horizontalFov /
                 (rayTracingConfiguration.numbersOfRay * 2)
         val degreeDivision = rayTracingConfiguration.horizontalFov / rayTracingConfiguration.numbersOfRay
+        val maxLateralDeviation = getX(maxLengthVisibility, 90 - rayTracingConfiguration.horizontalFov / 2)
         distanceToCollisionList.mapIndexed { index, distance ->
             (distance as? DistanceToCollision.WithinMeasurement)?.also {
                 pointMapper.toView(
@@ -29,8 +29,8 @@ class DistanceToCollisionMapper(private val pointMapper: PointMapper) {
                         getX(it.distance, (90 - startDestinationDegree) + degreeDivision * index),
                         getY(it.distance, (90 - startDestinationDegree) + degreeDivision * index)
                     ),
-                    visibleHeight,
-                    visibleWidth,
+                    maxLengthVisibility,
+                    maxLateralDeviation,
                     viewSize
                 ).also {
                     offsetList.add(Offset(it.x.toFloat(), it.y.toFloat()))
