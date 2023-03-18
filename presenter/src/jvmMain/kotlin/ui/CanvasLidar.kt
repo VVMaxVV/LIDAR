@@ -39,7 +39,6 @@ private const val RAYS_NUMBER = 16
 private const val RAYS_HORIZONTAL_FOV = 48
 private const val MAX_RAY_LENGTH = 45
 private const val VISIBILITY_HEIGHT = 45
-private const val VISIBILITY_WIDTH = 20
 private const val COLLISION_POINTS_WIDTH = 3f
 private const val CANVAS_VERTICAL_PADDING = 12f
 private val startPosition = Position(Point(x = 0f, y = 0f), TiltAngle(0))
@@ -83,11 +82,16 @@ class CanvasLidar(
                 .focusable()
         ) {
             controllerMovementsViewModel.setCurrentPosition(startPosition)
-            rayCalculationViewModel.setupLidarConfiguration(
-                RAYS_NUMBER,
-                RAYS_HORIZONTAL_FOV,
-                MAX_RAY_LENGTH
-            )
+            rayCalculationViewModel.apply {
+                setupConfiguration(
+                    RAYS_NUMBER,
+                    RAYS_HORIZONTAL_FOV,
+                    MAX_RAY_LENGTH,
+                    VISIBILITY_HEIGHT,
+                    this@Canvas.size
+                )
+                fetchPointsInterception()
+            }
             printRays()
             printScaleLine()
             printIntersectionsPoints()
@@ -134,25 +138,16 @@ class CanvasLidar(
                 return false
             }
         }
-        rayCalculationViewModel.fetchPointsInterception(
-            RAYS_NUMBER,
-            RAYS_HORIZONTAL_FOV,
-            MAX_RAY_LENGTH,
-            Size(canvasSize.height - CANVAS_VERTICAL_PADDING * 2, canvasSize.width),
-            VISIBILITY_HEIGHT,
-            VISIBILITY_WIDTH
-        )
+        rayCalculationViewModel.fetchPointsInterception()
         return true
     }
 
     private fun DrawScope.printRays() {
-        rayCalculationViewModel.getRays(
+        rayCalculationViewModel.getUiRays(
             RAYS_NUMBER,
             RAYS_HORIZONTAL_FOV,
             MAX_RAY_LENGTH,
-            Size(canvasSize.height - CANVAS_VERTICAL_PADDING * 2, canvasSize.width),
-            VISIBILITY_HEIGHT,
-            VISIBILITY_WIDTH
+            this.size
         )
         rayCalculationViewModel.rayList.value.map {
             drawLine(

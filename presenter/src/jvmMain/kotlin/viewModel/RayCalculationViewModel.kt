@@ -14,6 +14,12 @@ import model.RayTracingConfiguration
 import useCase.GetDistanceToCollisionUseCase
 import useCase.GetUiRaysUseCase
 import useCase.SetupRayTracingConfigurationUseCase
+import util.div
+import util.exception.ConfigurationException
+import util.exception.MaxVisibilityIsNullException
+import util.exception.RayTracingConfigurationIsNullException
+import util.exception.ViewSizeIsNullException
+import util.getX
 
 class RayCalculationViewModel(
     private val getUiRaysUseCase: GetUiRaysUseCase,
@@ -28,60 +34,56 @@ class RayCalculationViewModel(
     private val _pointList = mutableStateOf<List<Offset>>(emptyList())
     val pointList: State<List<Offset>> get() = _pointList
 
-    fun setupLidarConfiguration(
-        numbersOfRay: Int,
-        horizontalFov: Number,
-        maxRayLength: Number
-    ) {
-        setupRayTracingConfigurationUseCase.execute(
-            rayTracingConfiguration = RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength)
-        )
-    }
+    private var viewSize: Size? = null
+    private var maxVisibility: Number? = null
+    private var rayTracingConfiguration: RayTracingConfiguration? = null
 
-    fun fetchPointsInterception(
+    fun setupConfiguration(
         numbersOfRay: Int,
         horizontalFov: Number,
         maxRayLength: Number,
-        viewSize: Size,
-        visibilityInLength: Number,
-        visibilityInWidth: Number
+        maxVisibility: Number,
+        viewSize: Size
     ) {
+        this.viewSize = viewSize
+        this.maxVisibility = maxVisibility
+        this.rayTracingConfiguration =
+            RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength).also { rayTracingConfiguration ->
+                setupRayTracingConfigurationUseCase.execute(rayTracingConfiguration)
+            }
+    }
+
+    fun fetchPointsInterception() {
         CoroutineScope(Dispatchers.Default).launch {
             getDistanceToCollisionUseCase.execute().also {
-                _pointList.value =
-                    distanceToCollisionMapper.toOffsetsOnView(
-                        it,
-                        visibilityInLength,
-                        visibilityInWidth,
-                        RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength),
-                        viewSize
-                    )
+                try {
+                    _pointList.value =
+                        distanceToCollisionMapper.toOffsetsOnView(
+                            it,
+                            maxVisibility ?: throw MaxVisibilityIsNullException(),
+                            rayTracingConfiguration ?: throw RayTracingConfigurationIsNullException(),
+                            viewSize ?: throw ViewSizeIsNullException()
+                        )
+                } catch (e: ConfigurationException) {
+                    TODO("SHOW MESSAGE ABOUT ERROR")
+                }
             }
         }
     }
 
-    fun getRays(
+    fun getUiRays(
         numbersOfRay: Int,
         horizontalFov: Number,
         maxRayLength: Number,
-        viewSize: Size,
-        visibilityInLength: Number,
-        visibilityInWidth: Number
+        viewSize: Size
     ) {
+        val maxLateralDeviation = getX(maxRayLength, 90 - horizontalFov / 2)
         CoroutineScope(Dispatchers.Default).launch {
             getUiRaysUseCase.execute(
                 RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength)
             ).also { rayList ->
-                _rayList.value = rayMapper.toView(rayList, visibilityInLength, visibilityInWidth, viewSize)
+                _rayList.value = rayMapper.toView(rayList, maxRayLength, maxLateralDeviation, viewSize)
             }
-            fetchPointsInterception(
-                numbersOfRay,
-                horizontalFov,
-                maxRayLength,
-                viewSize,
-                visibilityInLength,
-                visibilityInWidth
-            )
         }
     }
 }
