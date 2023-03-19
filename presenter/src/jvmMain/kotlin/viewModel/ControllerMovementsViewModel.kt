@@ -7,52 +7,51 @@ import util.getX
 import util.getY
 import util.plus
 
-class ControllerMovementsViewModel(
+internal class ControllerMovementsViewModel(
     private val setCurrentPositionUseCase: SetCurrentPositionUseCase
 ) {
     private var currentPosition: Position? = null
     fun move(movements: Movements) {
         currentPosition?.let {
             when (movements) {
-                is Movements.MoveLeft -> it.currentCoordinates.moveTo(
+                Movements.MoveLeft -> it.currentCoordinates.moveTo(
                     Offset(
                         getX(-1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.x),
                         getY(-1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
                     )
                 )
 
-                is Movements.MoveRight -> it.currentCoordinates.moveTo(
+                Movements.MoveRight -> it.currentCoordinates.moveTo(
                     Offset(
                         getX(1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.x),
                         getY(1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
                     )
                 )
 
-                is Movements.MoveForward -> it.currentCoordinates.moveTo(
+                Movements.MoveForward -> it.currentCoordinates.moveTo(
                     Offset(
                         getX(1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.x),
                         getY(1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
                     )
                 )
 
-                is Movements.MoveBackward -> it.currentCoordinates.moveTo(
+                Movements.MoveBackward -> it.currentCoordinates.moveTo(
                     Offset(
                         getX(-1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.x),
                         getY(-1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
                     )
                 )
 
-                is Movements.RotateClockwise -> it.currentTiltAngle.rotateOnXPlane(-5)
-                is Movements.RotateCounterclockwise -> it.currentTiltAngle.rotateOnXPlane(5)
+                Movements.RotateClockwise -> it.currentTiltAngle.rotateOnXPlane(-5)
+                Movements.RotateCounterclockwise -> it.currentTiltAngle.rotateOnXPlane(5)
             }
+            setCurrentPositionUseCase.execute(it)
         }
     }
 
     fun setCurrentPosition(position: Position) {
         currentPosition = position
-        currentPosition?.let {
-            setCurrentPositionUseCase.execute(it)
-        }
+        setCurrentPositionUseCase.execute(position)
     }
 
     sealed class Movements() {
