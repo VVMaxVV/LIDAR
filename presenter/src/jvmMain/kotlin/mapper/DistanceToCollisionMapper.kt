@@ -16,9 +16,8 @@ internal class DistanceToCollisionMapper {
     ): List<Offset> {
         val offsetList = mutableListOf<Offset>()
         val startDestinationDegree =
-            rayTracingConfiguration.horizontalFov / 2 - rayTracingConfiguration.horizontalFov /
-                (rayTracingConfiguration.numbersOfRay * 2)
-        val degreeDivision = rayTracingConfiguration.horizontalFov / rayTracingConfiguration.numbersOfRay
+            rayTracingConfiguration.horizontalFov / 2
+        val degreeDivision = rayTracingConfiguration.horizontalFov / (rayTracingConfiguration.numbersOfRay - 1)
         distanceToCollisionList.mapIndexed { index, distance ->
             (distance as? DistanceToCollision.WithinMeasurement)?.also {
                 if (it.distance < maxLengthVisibility) {
