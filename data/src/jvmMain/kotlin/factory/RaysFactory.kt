@@ -18,9 +18,8 @@ internal class RaysFactory {
     ): List<Ray> {
         val raysList = mutableListOf<Ray>()
         val startDestinationDegree =
-            rayTracingConfiguration.horizontalFov / 2 - rayTracingConfiguration.horizontalFov /
-                (rayTracingConfiguration.numbersOfRay * 2)
-        val degreeDivision = rayTracingConfiguration.horizontalFov / rayTracingConfiguration.numbersOfRay
+            rayTracingConfiguration.horizontalFov / 2
+        val degreeDivision = rayTracingConfiguration.horizontalFov / (rayTracingConfiguration.numbersOfRay - 1)
         for (rayNumber in 0 until rayTracingConfiguration.numbersOfRay) {
             raysList.add(
                 Ray(
