@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 
 @Composable
-fun MeasureUnconstrainedViewWidth(
+fun measureViewWidth(
     viewToMeasure: @Composable () -> Unit,
     content: @Composable (measuredWidth: Dp) -> Unit
 ) {
@@ -24,7 +24,7 @@ fun MeasureUnconstrainedViewWidth(
 }
 
 @Composable
-fun MeasureUnconstrainedViewHeight(
+fun measureViewHeight(
     viewToMeasure: @Composable () -> Unit,
     content: @Composable (measuredWidth: Dp) -> Unit
 ) {

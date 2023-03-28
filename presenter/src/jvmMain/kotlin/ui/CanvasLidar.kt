@@ -42,9 +42,9 @@ import androidx.constraintlayout.compose.Dimension
 import model.Point
 import model.Position
 import model.TiltAngle
-import util.MeasureUnconstrainedViewHeight
-import util.MeasureUnconstrainedViewWidth
 import util.getX
+import util.measureViewHeight
+import util.measureViewWidth
 import viewModel.ControllerMovementsViewModel
 import viewModel.RayCalculationViewModel
 
@@ -55,6 +55,8 @@ private const val APPARENT_RAY_LENGTH = 45
 private const val COLLISION_POINTS_SIZE = .5f
 private const val CANVAS_VERTICAL_PADDING = 12f
 private const val CANVAS_HORIZONTAL_PADDING = 12f
+private const val CANVAS_TOP_MARGIN = 16
+private const val CANVAS_START_MARGIN = 64
 private const val NUM_VERTICAL_SCALE_LINES = 10
 private const val NUM_HORIZONTAL_SCALE_LINES = 5
 private const val RULER_FONT_SIZE = 16
@@ -89,8 +91,8 @@ internal class CanvasLidar(
         setupConfigurationViewModels()
         Canvas(
             Modifier.constrainAs(canvasReference) {
-                top.linkTo(parent.top, margin = 16.dp)
-                start.linkTo(parent.start, margin = 64.dp)
+                top.linkTo(parent.top, margin = CANVAS_TOP_MARGIN.dp)
+                start.linkTo(parent.start, margin = CANVAS_START_MARGIN.dp)
             }
                 .size(canvasSize.width.dp, canvasSize.height.dp)
                 .background(Color.Black)
@@ -251,7 +253,7 @@ internal class CanvasLidar(
                 }
             ) {
                 repeat(NUM_VERTICAL_SCALE_LINES) { i ->
-                    MeasureUnconstrainedViewHeight(viewToMeasure = {
+                    measureViewHeight(viewToMeasure = {
                         Text(
                             text = "${(APPARENT_RAY_LENGTH / (NUM_VERTICAL_SCALE_LINES - 1f) * (NUM_VERTICAL_SCALE_LINES - i - 1)).toInt()}m",
                             fontSize = RULER_FONT_SIZE.sp
@@ -288,7 +290,7 @@ internal class CanvasLidar(
             ) {
                 val halfSectorWidth = getX(APPARENT_RAY_LENGTH, 90 - HORIZONTAL_FOV / 2)
                 repeat(NUM_HORIZONTAL_SCALE_LINES) { i ->
-                    MeasureUnconstrainedViewWidth(viewToMeasure = {
+                    measureViewWidth(viewToMeasure = {
                         Text(
                             text = "${((-halfSectorWidth) + (2 * halfSectorWidth / (NUM_HORIZONTAL_SCALE_LINES - 1) * i)).toInt()}m",
                             fontSize = RULER_FONT_SIZE.sp
