@@ -26,11 +26,5 @@ kotlin {
                 api("io.mockk:mockk:1.13.4")
             }
         }
-        val jvmTest by getting {
-            dependencies {
-                api("junit:junit:4.13.2")
-                api("io.mockk:mockk:1.13.4")
-            }
-        }
     }
 }
