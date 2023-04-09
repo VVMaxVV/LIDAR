@@ -3,10 +3,7 @@ package ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
@@ -28,13 +25,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import java.util.Locale
 import util.compareTo
 import util.minus
 import util.plus
-import java.util.Locale
 
 private const val BORDER_WIDTH = 1
+private const val TEXT_FIELD_BORDER_WIDTH = 1
 private const val ROUNDED_CORNER = 16
+private const val TEXT_FIELD_VERTICAL_PADDING = 4
+private val borderColor = Color.Black
 
 @Composable
 fun Counter(
@@ -51,7 +51,7 @@ fun Counter(
     var isError by rememberSaveable { mutableStateOf(false) }
 
     Row(
-        modifier = modifier.border(BorderStroke(BORDER_WIDTH.dp, Color.Black), RoundedCornerShape(ROUNDED_CORNER.dp)).fillMaxWidth(),
+        modifier = modifier.border(BorderStroke(BORDER_WIDTH.dp, borderColor), RoundedCornerShape(ROUNDED_CORNER.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
@@ -60,7 +60,7 @@ fun Counter(
                     (count.toDouble() - step).coerceAtLeast(minValue.toFloat()).also(onValueChanged)
                 )
             },
-            modifier = Modifier.weight(0.25f)
+            modifier = Modifier.weight(1f / 4)
         ) {
             Icon(Icons.Filled.Remove, contentDescription = "Decrement")
         }
@@ -68,7 +68,9 @@ fun Counter(
         TextField(
             value = count,
             modifier = Modifier
-                .widthIn(min = 32.dp).border(1.dp, Color.Black).padding(vertical = 4.dp).weight(0.25f).wrapContentHeight(),
+                .border(TEXT_FIELD_BORDER_WIDTH.dp, borderColor)
+                .padding(vertical = TEXT_FIELD_VERTICAL_PADDING.dp)
+                .weight(1f / 4),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             textStyle = textStyle,
             singleLine = true,
@@ -102,7 +104,7 @@ fun Counter(
                     (count.toDouble() + step).coerceAtMost(maxValue.toFloat()).also(onValueChanged)
                 )
             },
-            modifier = Modifier.weight(0.25f)
+            modifier = Modifier.weight(1f / 4)
         ) {
             Icon(Icons.Filled.Add, contentDescription = "Increment")
         }

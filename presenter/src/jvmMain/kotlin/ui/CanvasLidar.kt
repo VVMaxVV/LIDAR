@@ -93,9 +93,9 @@ internal class CanvasLidar(
                 top.linkTo(parent.top, margin = CANVAS_TOP_MARGIN.dp)
                 start.linkTo(parent.start, margin = CANVAS_START_MARGIN.dp)
             }.size(canvasSize.width.dp, canvasSize.height.dp).background(Color.Black)
-                .padding(vertical = CANVAS_VERTICAL_PADDING.dp, horizontal = CANVAS_HORIZONTAL_PADDING.dp).onKeyEvent {
-                    handleKeyEvent(it)
-                }.focusRequester(requester)
+                .padding(vertical = CANVAS_VERTICAL_PADDING.dp, horizontal = CANVAS_HORIZONTAL_PADDING.dp)
+                .onKeyEvent { handleKeyEvent(it) }
+                .focusRequester(requester)
                 .focusable()
                 .onClick { requester.requestFocus() }
                 .onFocusEvent { rayCalculationViewModel.fetchPointsInterception() }

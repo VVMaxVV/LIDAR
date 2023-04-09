@@ -9,9 +9,11 @@ import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.get
 import ui.MainWindow
 
+private const val WINDOW_WIDTH = 1000
+
 fun main() = application {
     uploadModules()
-    Window(onCloseRequest = ::exitApplication, state = WindowState(width = 1000.dp)) {
+    Window(onCloseRequest = ::exitApplication, state = WindowState(width = WINDOW_WIDTH.dp)) {
         (get(MainWindow::class.java) as MainWindow).start()
     }
 }
