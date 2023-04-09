@@ -17,6 +17,7 @@ kotlin {
             dependencies {
                 api(compose.desktop.currentOs)
                 api("io.insert-koin:koin-core:3.3.2")
+                implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.3.1")
             }
         }
         val jvmTest by getting {
