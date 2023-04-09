@@ -12,8 +12,8 @@ import model.RayTracingConfiguration
 import useCase.GetDistanceToCollisionUseCase
 import useCase.GetUiRaysUseCase
 import useCase.SetupRayTracingConfigurationUseCase
+import util.exception.ApparentVisibilityIsNullException
 import util.exception.ConfigurationException
-import util.exception.MaxVisibilityIsNullException
 import util.exception.RayTracingConfigurationIsNullException
 
 internal class RayCalculationViewModel(
@@ -28,17 +28,19 @@ internal class RayCalculationViewModel(
     private val _pointList = mutableStateOf<List<Offset>>(emptyList())
     val pointList: State<List<Offset>> get() = _pointList
 
-    private var maxVisibility: Number? = null
-    private var rayTracingConfiguration: RayTracingConfiguration? = null
+    private var _apparentVisibility = mutableStateOf<Number?>(null)
+    val apparentVisibility: State<Number?> get() = _apparentVisibility
+    private var _rayTracingConfiguration = mutableStateOf<RayTracingConfiguration?>(null)
+    val rayTracingConfiguration: State<RayTracingConfiguration?> get() = _rayTracingConfiguration
 
     fun setupConfiguration(
         numbersOfRay: Int,
         horizontalFov: Number,
         maxRayLength: Number,
-        maxVisibility: Number
+        apparentVisibility: Number
     ) {
-        this.maxVisibility = maxVisibility
-        this.rayTracingConfiguration =
+        this._apparentVisibility.value = apparentVisibility
+        this._rayTracingConfiguration.value =
             RayTracingConfiguration(numbersOfRay, horizontalFov, maxRayLength).also { rayTracingConfiguration ->
                 setupRayTracingConfigurationUseCase.execute(rayTracingConfiguration)
             }
@@ -51,8 +53,8 @@ internal class RayCalculationViewModel(
                     _pointList.value =
                         distanceToCollisionMapper.toOffsetsOnView(
                             it,
-                            maxVisibility ?: throw MaxVisibilityIsNullException(),
-                            rayTracingConfiguration ?: throw RayTracingConfigurationIsNullException()
+                            _apparentVisibility.value ?: throw ApparentVisibilityIsNullException(),
+                            _rayTracingConfiguration.value ?: throw RayTracingConfigurationIsNullException()
                         )
                 } catch (e: ConfigurationException) {
                     TODO("SHOW MESSAGE ABOUT ERROR")
@@ -62,11 +64,19 @@ internal class RayCalculationViewModel(
     }
 
     fun getUiRays() {
-        rayTracingConfiguration?.let {
+        _rayTracingConfiguration.value?.let {
             CoroutineScope(Dispatchers.Default).launch {
-                _rayList.value = getUiRaysUseCase.execute(
-                    RayTracingConfiguration(it.numbersOfRay, it.horizontalFov, it.maxLength)
-                )
+                try {
+                    _rayList.value = getUiRaysUseCase.execute(
+                        RayTracingConfiguration(
+                            it.numbersOfRay,
+                            it.horizontalFov,
+                            _apparentVisibility.value ?: throw ApparentVisibilityIsNullException()
+                        )
+                    )
+                } catch (e: ConfigurationException) {
+                    TODO("SHOW MESSAGE ABOUT ERROR")
+                }
             }
         }
     }
