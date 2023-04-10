@@ -30,8 +30,12 @@ internal class RayCalculationViewModel(
 
     private var _apparentVisibility = mutableStateOf<Number?>(null)
     val apparentVisibility: State<Number?> get() = _apparentVisibility
+
     private var _rayTracingConfiguration = mutableStateOf<RayTracingConfiguration?>(null)
     val rayTracingConfiguration: State<RayTracingConfiguration?> get() = _rayTracingConfiguration
+
+    private var _errorText = mutableStateOf<String?>(null)
+    val errorText: State<String?> get() = _errorText
 
     fun setupConfiguration(
         numbersOfRay: Int,
@@ -56,8 +60,9 @@ internal class RayCalculationViewModel(
                             _apparentVisibility.value ?: throw ApparentVisibilityIsNullException(),
                             _rayTracingConfiguration.value ?: throw RayTracingConfigurationIsNullException()
                         )
-                } catch (e: ConfigurationException) {
-                    TODO("SHOW MESSAGE ABOUT ERROR")
+                    _errorText.value = null
+                } catch (e: Exception) {
+                    handleError(e)
                 }
             }
         }
@@ -74,10 +79,18 @@ internal class RayCalculationViewModel(
                             _apparentVisibility.value ?: throw ApparentVisibilityIsNullException()
                         )
                     )
-                } catch (e: ConfigurationException) {
-                    TODO("SHOW MESSAGE ABOUT ERROR")
+                    _errorText.value = null
+                } catch (e: Exception) {
+                    handleError(e)
                 }
             }
+        }
+    }
+
+    private fun handleError(e: Exception) {
+        when (e) {
+            is ConfigurationException -> _errorText.value = "Configuration not installed"
+            else -> _errorText.value = "Something went wrong ($e)"
         }
     }
 }
