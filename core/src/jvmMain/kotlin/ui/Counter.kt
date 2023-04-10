@@ -25,10 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import java.util.Locale
 import util.compareTo
 import util.minus
 import util.plus
+import java.util.Locale
 
 private const val BORDER_WIDTH = 1
 private const val TEXT_FIELD_BORDER_WIDTH = 1
