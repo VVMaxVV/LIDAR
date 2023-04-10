@@ -69,22 +69,33 @@ internal class CanvasLidar(
     private var rayConfiguration by mutableStateOf(rayCalculationViewModel.rayTracingConfiguration)
     private var apparentVisibility by mutableStateOf(rayCalculationViewModel.apparentVisibility)
 
+    private lateinit var canvasReference: ConstrainedLayoutReference
+    private lateinit var verticalCanvasRulerReference: ConstrainedLayoutReference
+    private lateinit var horizontalCanvasRulerReference: ConstrainedLayoutReference
+    private lateinit var errorMessageReference: ConstrainedLayoutReference
+
     @Preview
     @Composable
     fun display() {
         ConstraintLayout {
-            val (canvasReference, verticalCanvasRulerReference, horizontalCanvasRulerReference) = createRefs()
-            printVerticalCanvasRulerLabel(verticalCanvasRulerReference, canvasReference)
-            printHorizontalCanvasRulerLabel(horizontalCanvasRulerReference, canvasReference)
-            printCanvas(canvasReference)
+            initConstraintRefs()
+            printCanvas()
+            printVerticalCanvasRulerLabel()
+            printHorizontalCanvasRulerLabel()
+            handleErrorMessage()
         }
+    }
+
+    private fun ConstraintLayoutScope.initConstraintRefs() {
+        canvasReference = createRef()
+        verticalCanvasRulerReference = createRef()
+        horizontalCanvasRulerReference = createRef()
+        errorMessageReference = createRef()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    private fun ConstraintLayoutScope.printCanvas(
-        canvasReference: ConstrainedLayoutReference
-    ) {
+    private fun ConstraintLayoutScope.printCanvas() {
         val requester = remember { FocusRequester() }
         LaunchedEffect(Unit) { requester.requestFocus() }
         canvasLidarViewModel.setCanvasFocus(requester)
@@ -237,10 +248,7 @@ internal class CanvasLidar(
     }
 
     @Composable
-    private fun ConstraintLayoutScope.printVerticalCanvasRulerLabel(
-        verticalCanvasRulerReference: ConstrainedLayoutReference,
-        canvasReference: ConstrainedLayoutReference
-    ) {
+    private fun ConstraintLayoutScope.printVerticalCanvasRulerLabel() {
         apparentVisibility.value?.let { apparentVisibility ->
             canvasViewSizeState?.let { size ->
                 Box(
@@ -275,10 +283,7 @@ internal class CanvasLidar(
     }
 
     @Composable
-    private fun ConstraintLayoutScope.printHorizontalCanvasRulerLabel(
-        horizontalCanvasRulerReference: ConstrainedLayoutReference,
-        canvasReference: ConstrainedLayoutReference
-    ) {
+    private fun ConstraintLayoutScope.printHorizontalCanvasRulerLabel() {
         apparentVisibility.value?.let { apparentVisibility ->
             canvasViewSizeState?.let { size ->
                 rayConfiguration.value?.horizontalFov?.let { horizontalFov ->
@@ -312,6 +317,22 @@ internal class CanvasLidar(
                     }
                 }
             }
+        }
+    }
+
+    @Composable
+    private fun ConstraintLayoutScope.handleErrorMessage() {
+        rayCalculationViewModel.errorText.value?.let {
+            Text(
+                text = it,
+                modifier = Modifier.constrainAs(errorMessageReference) {
+                    top.linkTo(canvasReference.top)
+                    end.linkTo(canvasReference.end)
+                    bottom.linkTo(canvasReference.bottom)
+                    start.linkTo(canvasReference.start)
+                },
+                color = Color.Red
+            )
         }
     }
 }
