@@ -79,6 +79,7 @@ internal class RayCalculationViewModel(
                             _apparentVisibility.value ?: throw ApparentVisibilityIsNullException()
                         )
                     )
+                    _errorText.value = null
                 } catch (e: Exception) {
                     handleError(e)
                 }

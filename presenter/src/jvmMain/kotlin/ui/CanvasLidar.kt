@@ -57,6 +57,7 @@ private const val CANVAS_HORIZONTAL_PADDING = 12f
 private const val CANVAS_TOP_MARGIN = 16
 private const val CANVAS_START_MARGIN = 64
 private const val RULER_FONT_SIZE = 16
+private const val ERROR_MESSAGE_MARGIN = 4
 private val canvasSize = Size(400f, 420f)
 
 internal class CanvasLidar(
@@ -326,10 +327,10 @@ internal class CanvasLidar(
             Text(
                 text = it,
                 modifier = Modifier.constrainAs(errorMessageReference) {
-                    top.linkTo(canvasReference.top)
-                    end.linkTo(canvasReference.end)
-                    bottom.linkTo(canvasReference.bottom)
-                    start.linkTo(canvasReference.start)
+                    top.linkTo(canvasReference.top, margin = ERROR_MESSAGE_MARGIN.dp)
+                    end.linkTo(canvasReference.end, margin = ERROR_MESSAGE_MARGIN.dp)
+                    bottom.linkTo(canvasReference.bottom, margin = ERROR_MESSAGE_MARGIN.dp)
+                    start.linkTo(canvasReference.start, margin = ERROR_MESSAGE_MARGIN.dp)
                 },
                 color = Color.Red
             )
