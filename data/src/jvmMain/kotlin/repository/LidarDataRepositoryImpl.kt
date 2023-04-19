@@ -2,8 +2,11 @@ package repository
 
 import androidx.compose.ui.geometry.Offset
 import factory.RaysFactory
+import mapper.OffsetMapper
+import mapper.PointMapper
+import model.AABBBox
 import model.DistanceToCollision
-import model.Obstacle
+import model.Line
 import model.Position
 import model.Ray
 import model.RayTracingConfiguration
@@ -12,7 +15,9 @@ import util.getDistanceToIntersection
 
 internal class LidarDataRepositoryImpl(
     private val obstacleRepositoryImpl: ObstaclesRepository,
-    private val raysFactory: RaysFactory
+    private val raysFactory: RaysFactory,
+    private val pointMapper: PointMapper,
+    private val offsetMapper: OffsetMapper
 ) : LidarDataRepository {
     private var _rayTracingConfiguration: RayTracingConfiguration? = null
     private var _position: Position? = null
@@ -21,11 +26,27 @@ internal class LidarDataRepositoryImpl(
         val distanceToIntersection = mutableListOf<DistanceToCollision>()
         _rayTracingConfiguration?.let { configuration ->
             _position?.let { position ->
-                val obstacleList = obstacleRepositoryImpl.getAllObstacles()
-                raysFactory.get(configuration, position).forEach { ray ->
-                    getDistanceToAllIntersectionForRay(ray, obstacleList).also { allIntersectionDistanceForRay ->
-                        getDistanceToNearestObstacle(allIntersectionDistanceForRay, configuration.maxLength).also {
-                            distanceToIntersection.add(it)
+                val aabbBox: AABBBox?
+                raysFactory.get(
+                    RayTracingConfiguration(3, configuration.horizontalFov, configuration.maxLength),
+                    position
+                ).also { rayList ->
+                    aabbBox =
+                        pointMapper.getAABBBox(
+                            mutableSetOf(offsetMapper.toPoint(rayList[0].start)).also { pointSet ->
+                                rayList.forEach {
+                                    pointSet.add(offsetMapper.toPoint(it.end))
+                                }
+                            }.toList()
+                        )
+                }
+                aabbBox?.let { box ->
+                    val obstacleList = obstacleRepositoryImpl.getLinesWithinPoints(box.firstPoint, box.secondPoint)
+                    raysFactory.get(configuration, position).forEach { ray ->
+                        getDistanceToAllIntersectionForRay(ray, obstacleList).also { allIntersectionDistanceForRay ->
+                            getDistanceToNearestObstacle(allIntersectionDistanceForRay, configuration.maxLength).also {
+                                distanceToIntersection.add(it)
+                            }
                         }
                     }
                 }
@@ -42,25 +63,20 @@ internal class LidarDataRepositoryImpl(
         _position = currentPosition
     }
 
-    private fun getDistanceToAllIntersectionForRay(ray: Ray, obstaclesList: List<Obstacle>): List<Number?> {
+    private fun getDistanceToAllIntersectionForRay(ray: Ray, obstaclesList: List<Line>): List<Number?> {
         val allIntersectionDistanceForRay = mutableListOf<Number?>()
-        obstaclesList.map { obstacle ->
-            obstacle.listOfCoordinates.mapIndexed { index, point ->
-                if (index + 1 < obstacle.listOfCoordinates.size) {
-                    val nextPoint = obstacle.listOfCoordinates[index + 1]
-                    getDistanceToIntersection(
-                        ray,
-                        Ray(
-                            Offset(point.x.toFloat(), point.y.toFloat()),
-                            Offset(
-                                nextPoint.x.toFloat(),
-                                nextPoint.y.toFloat()
-                            )
-                        )
-                    ).also {
-                        allIntersectionDistanceForRay.add(it)
-                    }
-                }
+        obstaclesList.forEach { line ->
+            getDistanceToIntersection(
+                ray,
+                Ray(
+                    Offset(line.startPoint.x.toFloat(), line.startPoint.y.toFloat()),
+                    Offset(
+                        line.endPoint.x.toFloat(),
+                        line.endPoint.y.toFloat()
+                    )
+                )
+            ).also {
+                allIntersectionDistanceForRay.add(it)
             }
         }
         return allIntersectionDistanceForRay
