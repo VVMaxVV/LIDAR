@@ -1,10 +1,10 @@
 package model
 
+import kotlin.math.abs
 import util.CHUNK_SIZE
 import util.compareTo
 import util.minus
 import util.plus
-import kotlin.math.abs
 
 data class Line(val startPoint: Point, val endPoint: Point) {
     fun getListChunksForLine(): List<Chunk> {
@@ -16,26 +16,18 @@ data class Line(val startPoint: Point, val endPoint: Point) {
 
         when {
             this.startPoint.getChunk().y == this.endPoint.getChunk().y -> {
-                if (startPoint.x < endPoint.x) {
-                    for (i in this.startPoint.getChunk().x..this.endPoint.getChunk().x) {
-                        listChunks.add(Chunk(i, this.startPoint.getChunk().y))
-                    }
-                } else {
-                    for (i in this.startPoint.getChunk().x downTo this.endPoint.getChunk().x) {
-                        listChunks.add(Chunk(i, this.startPoint.getChunk().y))
-                    }
+                for (
+                i in minOf(this.startPoint.getChunk().x, this.endPoint.getChunk().x)..maxOf(this.startPoint.getChunk().x, this.endPoint.getChunk().x)
+                ) {
+                    listChunks.add(Chunk(i, this.startPoint.getChunk().y))
                 }
             }
 
             this.startPoint.getChunk().x == this.endPoint.getChunk().x -> {
-                if (startPoint.y < endPoint.y) {
-                    for (i in this.startPoint.getChunk().y..this.endPoint.getChunk().y) {
-                        listChunks.add(Chunk(this.startPoint.getChunk().x, i))
-                    }
-                } else {
-                    for (i in this.startPoint.getChunk().y downTo this.endPoint.getChunk().y) {
-                        listChunks.add(Chunk(this.startPoint.getChunk().x, i))
-                    }
+                for (
+                i in minOf(this.startPoint.getChunk().y, this.endPoint.getChunk().y)..maxOf(this.startPoint.getChunk().y, this.endPoint.getChunk().y)
+                ) {
+                    listChunks.add(Chunk(this.startPoint.getChunk().x, i))
                 }
             }
 
@@ -43,10 +35,7 @@ data class Line(val startPoint: Point, val endPoint: Point) {
                 val slope = dx / dy
                 val currentPoint = this.startPoint
                 listChunks.add(currentPoint.getChunk())
-                while (true) {
-                    if (listChunks.last() == this.endPoint.getChunk()) {
-                        break
-                    }
+                while (listChunks.last() != this.endPoint.getChunk()) {
                     val chunkBorderX = (currentPoint.getChunk().x * CHUNK_SIZE + (CHUNK_SIZE / 2 * sx))
                     val chunkBorderY = (currentPoint.getChunk().y * CHUNK_SIZE + (CHUNK_SIZE / 2 * sy))
                     val chunkBorderDeltaX = abs(chunkBorderX - currentPoint.x) * sx

@@ -5,6 +5,6 @@ import model.Point
 
 internal class OffsetMapper {
     fun toPoint(offset: Offset): Point {
-        return Point(offset.x.toDouble(), offset.y)
+        return Point(offset.x, offset.y)
     }
 }

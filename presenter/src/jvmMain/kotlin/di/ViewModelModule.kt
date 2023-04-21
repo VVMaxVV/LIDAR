@@ -7,6 +7,6 @@ import viewModel.RayCalculationViewModel
 
 internal val viewModelModule = module {
     single { RayCalculationViewModel(get(), get(), get(), get()) }
-    single { ControllerMovementsViewModel(get()) }
+    single { ControllerMovementsViewModel(get(), get()) }
     single { CanvasLidarViewModel() }
 }
