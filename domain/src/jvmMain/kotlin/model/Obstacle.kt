@@ -1,3 +1,3 @@
 package model
 
-data class Obstacle(val listOfCoordinates: List<Point>)
+data class Obstacle(val listOfLines: List<Line>)

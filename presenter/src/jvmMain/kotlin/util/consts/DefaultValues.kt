@@ -14,6 +14,7 @@ internal class DefaultValues {
         const val COLLISION_POINTS_SIZE = .5f
         const val NUM_VERTICAL_SCALE_LINES = 10
         const val NUM_HORIZONTAL_SCALE_LINES = 5
+        const val SIZE_CHECKED_ZONE_AROUND_POSITION = 4
         val startPosition = Position(Point(x = 0f, y = 0f), TiltAngle(0))
         val raysColor = Color.White
         val collisionPointsColor = Color.Green

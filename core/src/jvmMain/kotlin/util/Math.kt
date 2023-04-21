@@ -1,5 +1,6 @@
 package util
 
+import model.Line
 import model.Point
 import model.Ray
 import kotlin.math.PI
@@ -65,3 +66,35 @@ fun getPointIntersectionOfLines(firstLine: Ray, secondLine: Ray): Point? {
 
     return null
 }
+
+fun getPointIntersectionOfLines(firstLine: Line, secondLine: Line): Point? {
+    val denominator =
+        (firstLine.startPoint.x - firstLine.endPoint.x) * (secondLine.startPoint.y - secondLine.endPoint.y) -
+            (firstLine.startPoint.y - firstLine.endPoint.y) * (secondLine.startPoint.x - secondLine.endPoint.x)
+    if (denominator == 0f) {
+        return null
+    }
+
+    val t =
+        (
+            (firstLine.startPoint.x - secondLine.startPoint.x) * (secondLine.startPoint.y - secondLine.endPoint.y) -
+                (firstLine.startPoint.y - secondLine.startPoint.y) *
+                (secondLine.startPoint.x - secondLine.endPoint.x)
+            ) / denominator
+    val u =
+        -(
+            (firstLine.startPoint.x - firstLine.endPoint.x) * (firstLine.startPoint.y - secondLine.startPoint.y) -
+                (firstLine.startPoint.y - firstLine.endPoint.y) *
+                (firstLine.startPoint.x - secondLine.startPoint.x)
+            ) / denominator
+
+    if (t in 0f..1f && u in 0f..1f) {
+        val x = firstLine.startPoint.x + t * (firstLine.endPoint.x - firstLine.startPoint.x)
+        val y = firstLine.startPoint.y + t * (firstLine.endPoint.y - firstLine.startPoint.y)
+        return Point(x, y)
+    }
+
+    return null
+}
+
+fun isLineIntersection(firstLine: Line, secondLine: Line) = getPointIntersectionOfLines(firstLine, secondLine) != null
