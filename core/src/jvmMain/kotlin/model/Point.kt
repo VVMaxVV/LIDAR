@@ -1,14 +1,14 @@
 package model
 
 import androidx.compose.ui.geometry.Offset
-import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sqrt
 import util.CHUNK_SIZE
 import util.compareTo
 import util.minus
 import util.plus
 import util.times
+import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 data class Point(var x: Number = 0, var y: Number = 0) {
     fun move(offset: Offset) {
