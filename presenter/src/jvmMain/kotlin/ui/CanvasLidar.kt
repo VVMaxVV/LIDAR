@@ -6,10 +6,13 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.onClick
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +45,7 @@ import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
+import model.Point
 import util.consts.DefaultValues
 import util.div
 import util.getX
@@ -50,6 +54,7 @@ import util.measureViewWidth
 import util.times
 import viewModel.CanvasLidarViewModel
 import viewModel.ControllerMovementsViewModel
+import viewModel.NavigationViewModel
 import viewModel.RayCalculationViewModel
 
 private const val CANVAS_VERTICAL_PADDING = 12f
@@ -63,7 +68,8 @@ private val canvasSize = Size(400f, 420f)
 internal class CanvasLidar(
     private val rayCalculationViewModel: RayCalculationViewModel,
     private val controllerMovementsViewModel: ControllerMovementsViewModel,
-    private val canvasLidarViewModel: CanvasLidarViewModel
+    private val canvasLidarViewModel: CanvasLidarViewModel,
+    private val navigationViewModel: NavigationViewModel
 ) {
     private var canvasViewSizeState by mutableStateOf<Size?>(null)
 
@@ -74,16 +80,20 @@ internal class CanvasLidar(
     private lateinit var verticalCanvasRulerReference: ConstrainedLayoutReference
     private lateinit var horizontalCanvasRulerReference: ConstrainedLayoutReference
     private lateinit var errorMessageReference: ConstrainedLayoutReference
+    private lateinit var controlButtonsReference: ConstrainedLayoutReference
 
     @Preview
     @Composable
     fun display() {
-        ConstraintLayout {
-            initConstraintRefs()
-            printCanvas()
-            printVerticalCanvasRulerLabel()
-            printHorizontalCanvasRulerLabel()
-            handleErrorMessage()
+        Column {
+            ConstraintLayout {
+                initConstraintRefs()
+                printCanvas()
+                printVerticalCanvasRulerLabel()
+                printHorizontalCanvasRulerLabel()
+                printControlButtons()
+                handleErrorMessage()
+            }
         }
     }
 
@@ -92,6 +102,7 @@ internal class CanvasLidar(
         verticalCanvasRulerReference = createRef()
         horizontalCanvasRulerReference = createRef()
         errorMessageReference = createRef()
+        controlButtonsReference = createRef()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -173,7 +184,8 @@ internal class CanvasLidar(
                     it.nativeCanvas.apply {
                         repeat(DefaultValues.NUM_VERTICAL_SCALE_LINES) { i ->
                             drawIntoCanvas {
-                                val lineYCoordinate = apparentRayLength / (DefaultValues.NUM_VERTICAL_SCALE_LINES - 1f) * i
+                                val lineYCoordinate =
+                                    apparentRayLength / (DefaultValues.NUM_VERTICAL_SCALE_LINES - 1f) * i
                                 drawLine(
                                     Color.Black,
                                     Offset(lineStartXCoordinate, lineYCoordinate),
@@ -316,6 +328,31 @@ internal class CanvasLidar(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ConstraintLayoutScope.printControlButtons() {
+        rayConfiguration.value?.let {
+            Column(
+                Modifier.constrainAs(controlButtonsReference) {
+                    top.linkTo(horizontalCanvasRulerReference.bottom)
+                    start.linkTo(canvasReference.start)
+                    end.linkTo(canvasReference.end)
+                    width = Dimension.fillToConstraints
+                }
+            ) {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        controllerMovementsViewModel.moveAlong(
+                            navigationViewModel.getPath(DefaultValues.startPosition, Point(0, 10))
+                        )
+                    }
+                ) {
+                    Text("Start move")
                 }
             }
         }
