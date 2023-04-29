@@ -1,9 +1,9 @@
 package repository
 
 import factory.PathFactory
-import kotlin.math.roundToInt
 import model.GridSpace
 import model.Point
+import kotlin.math.roundToInt
 
 private const val ARRAY_SIZE = 100
 

@@ -1,12 +1,12 @@
 package util
 
+import model.Line
+import model.Point
+import model.Ray
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
-import model.Line
-import model.Point
-import model.Ray
 
 fun Number.toRadians() = this.toFloat() * PI / 180
 
