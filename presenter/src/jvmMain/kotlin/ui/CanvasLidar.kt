@@ -4,12 +4,17 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.onClick
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +40,7 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -42,6 +48,8 @@ import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
+import model.Point
+import model.Position
 import util.consts.DefaultValues
 import util.div
 import util.getX
@@ -58,7 +66,10 @@ private const val CANVAS_TOP_MARGIN = 16
 private const val CANVAS_START_MARGIN = 64
 private const val RULER_FONT_SIZE = 16
 private const val ERROR_MESSAGE_MARGIN = 4
+private const val TEXT_COORDINATE_PADDING = 4
+private const val POSITION_VIEW_TOP_MARGIN = 4
 private val canvasSize = Size(400f, 420f)
+private val goalPoint = Point(0, 10)
 
 internal class CanvasLidar(
     private val rayCalculationViewModel: RayCalculationViewModel,
@@ -70,20 +81,28 @@ internal class CanvasLidar(
     private var rayConfiguration by mutableStateOf(rayCalculationViewModel.rayTracingConfiguration)
     private var apparentVisibility by mutableStateOf(rayCalculationViewModel.apparentVisibility)
 
+    private var currentPosition = mutableStateOf<Position?>(DefaultValues.startPosition)
+
     private lateinit var canvasReference: ConstrainedLayoutReference
     private lateinit var verticalCanvasRulerReference: ConstrainedLayoutReference
     private lateinit var horizontalCanvasRulerReference: ConstrainedLayoutReference
     private lateinit var errorMessageReference: ConstrainedLayoutReference
+    private lateinit var controlButtonsReference: ConstrainedLayoutReference
+    private lateinit var currentPositionViewReference: ConstrainedLayoutReference
 
     @Preview
     @Composable
     fun display() {
-        ConstraintLayout {
-            initConstraintRefs()
-            printCanvas()
-            printVerticalCanvasRulerLabel()
-            printHorizontalCanvasRulerLabel()
-            handleErrorMessage()
+        Column {
+            ConstraintLayout {
+                initConstraintRefs()
+                printCanvas()
+                printVerticalCanvasRulerLabel()
+                printHorizontalCanvasRulerLabel()
+                printCurrentPosition()
+                printControlButtons()
+                handleErrorMessage()
+            }
         }
     }
 
@@ -92,6 +111,8 @@ internal class CanvasLidar(
         verticalCanvasRulerReference = createRef()
         horizontalCanvasRulerReference = createRef()
         errorMessageReference = createRef()
+        controlButtonsReference = createRef()
+        currentPositionViewReference = createRef()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -173,7 +194,8 @@ internal class CanvasLidar(
                     it.nativeCanvas.apply {
                         repeat(DefaultValues.NUM_VERTICAL_SCALE_LINES) { i ->
                             drawIntoCanvas {
-                                val lineYCoordinate = apparentRayLength / (DefaultValues.NUM_VERTICAL_SCALE_LINES - 1f) * i
+                                val lineYCoordinate =
+                                    apparentRayLength / (DefaultValues.NUM_VERTICAL_SCALE_LINES - 1f) * i
                                 drawLine(
                                     Color.Black,
                                     Offset(lineStartXCoordinate, lineYCoordinate),
@@ -245,7 +267,9 @@ internal class CanvasLidar(
     }
 
     private fun setupConfigurationViewModels() {
-        controllerMovementsViewModel.setCurrentPosition(DefaultValues.startPosition)
+        currentPosition.let {
+            controllerMovementsViewModel.setCurrentPosition(it)
+        }
     }
 
     @Composable
@@ -316,6 +340,64 @@ internal class CanvasLidar(
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ConstraintLayoutScope.printCurrentPosition() {
+        rayConfiguration.value?.let {
+            val position by remember { currentPosition }
+            Row(
+                Modifier.constrainAs(currentPositionViewReference) {
+                    top.linkTo(horizontalCanvasRulerReference.bottom, margin = POSITION_VIEW_TOP_MARGIN.dp)
+                    start.linkTo(canvasReference.start)
+                    end.linkTo(canvasReference.end)
+                    width = Dimension.fillToConstraints
+                }
+            ) {
+                Text(
+                    text = "x: ${position?.currentCoordinates?.x?.toInt() ?: "null"}",
+                    modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = TEXT_COORDINATE_PADDING.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "y: ${position?.currentCoordinates?.y?.toInt() ?: "null"}",
+                    modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = TEXT_COORDINATE_PADDING.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "Angle: ${
+                    position?.currentTiltAngle?.getAngleOnXPlane?.toInt()?.let { (360 - it) % 360 } ?: "null"
+                    }°",
+                    modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = TEXT_COORDINATE_PADDING.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ConstraintLayoutScope.printControlButtons() {
+        rayConfiguration.value?.let {
+            Column(
+                Modifier.constrainAs(controlButtonsReference) {
+                    top.linkTo(currentPositionViewReference.bottom, 4.dp)
+                    start.linkTo(canvasReference.start)
+                    end.linkTo(canvasReference.end)
+                    width = Dimension.fillToConstraints
+                }
+            ) {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        currentPosition.value?.let {
+                            controllerMovementsViewModel.moveTo(goalPoint)
+                        }
+                    }
+                ) {
+                    Text("Start move")
                 }
             }
         }
