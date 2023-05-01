@@ -66,6 +66,8 @@ private const val CANVAS_TOP_MARGIN = 16
 private const val CANVAS_START_MARGIN = 64
 private const val RULER_FONT_SIZE = 16
 private const val ERROR_MESSAGE_MARGIN = 4
+private const val TEXT_COORDINATE_PADDING = 4
+private const val POSITION_VIEW_TOP_MARGIN = 4
 private val canvasSize = Size(400f, 420f)
 private val goalPoint = Point(0, 10)
 
@@ -86,6 +88,7 @@ internal class CanvasLidar(
     private lateinit var horizontalCanvasRulerReference: ConstrainedLayoutReference
     private lateinit var errorMessageReference: ConstrainedLayoutReference
     private lateinit var controlButtonsReference: ConstrainedLayoutReference
+    private lateinit var currentPositionViewReference: ConstrainedLayoutReference
 
     @Preview
     @Composable
@@ -96,6 +99,7 @@ internal class CanvasLidar(
                 printCanvas()
                 printVerticalCanvasRulerLabel()
                 printHorizontalCanvasRulerLabel()
+                printCurrentPosition()
                 printControlButtons()
                 handleErrorMessage()
             }
@@ -108,6 +112,7 @@ internal class CanvasLidar(
         horizontalCanvasRulerReference = createRef()
         errorMessageReference = createRef()
         controlButtonsReference = createRef()
+        currentPositionViewReference = createRef()
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -341,36 +346,49 @@ internal class CanvasLidar(
     }
 
     @Composable
-    private fun ConstraintLayoutScope.printControlButtons() {
+    private fun ConstraintLayoutScope.printCurrentPosition() {
         rayConfiguration.value?.let {
-            Column(
-                Modifier.constrainAs(controlButtonsReference) {
-                    top.linkTo(horizontalCanvasRulerReference.bottom, 4.dp)
+            val position by remember { currentPosition }
+            Row(
+                Modifier.constrainAs(currentPositionViewReference) {
+                    top.linkTo(horizontalCanvasRulerReference.bottom, margin = POSITION_VIEW_TOP_MARGIN.dp)
                     start.linkTo(canvasReference.start)
                     end.linkTo(canvasReference.end)
                     width = Dimension.fillToConstraints
                 }
             ) {
-                val position by remember { currentPosition }
-                Row(Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "x: ${position?.currentCoordinates?.x?.toInt() ?: "null"}",
-                        modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "y: ${position?.currentCoordinates?.y?.toInt() ?: "null"}",
-                        modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "Angle: ${
-                        position?.currentTiltAngle?.getAngleOnXPlane?.toInt()?.let { (360 - it) % 360 } ?: "null"
-                        }°",
-                        modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
+                Text(
+                    text = "x: ${position?.currentCoordinates?.x?.toInt() ?: "null"}",
+                    modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = TEXT_COORDINATE_PADDING.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "y: ${position?.currentCoordinates?.y?.toInt() ?: "null"}",
+                    modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = TEXT_COORDINATE_PADDING.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "Angle: ${
+                    position?.currentTiltAngle?.getAngleOnXPlane?.toInt()?.let { (360 - it) % 360 } ?: "null"
+                    }°",
+                    modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = TEXT_COORDINATE_PADDING.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ConstraintLayoutScope.printControlButtons() {
+        rayConfiguration.value?.let {
+            Column(
+                Modifier.constrainAs(controlButtonsReference) {
+                    top.linkTo(currentPositionViewReference.bottom, 4.dp)
+                    start.linkTo(canvasReference.start)
+                    end.linkTo(canvasReference.end)
+                    width = Dimension.fillToConstraints
                 }
+            ) {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {

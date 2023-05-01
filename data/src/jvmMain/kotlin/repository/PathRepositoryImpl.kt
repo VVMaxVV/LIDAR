@@ -1,9 +1,9 @@
 package repository
 
 import factory.PathFactory
+import kotlin.math.roundToInt
 import model.GridSpace
 import model.Point
-import kotlin.math.roundToInt
 
 private const val ARRAY_SIZE = 100
 
@@ -12,7 +12,7 @@ internal class PathRepositoryImpl(
 ) : PathRepository {
     private val patencyArray = Array(ARRAY_SIZE) { BooleanArray(ARRAY_SIZE) { true } }
 
-    override fun getPath(start: Point, goal: Point) = pathFactory.get(
+    override suspend fun getPath(start: Point, goal: Point) = pathFactory.get(
         start = Point(start.x.toDouble() + ARRAY_SIZE / 2 - 1, start.y.toDouble() + ARRAY_SIZE / 2 - 1),
         goal = Point(goal.x.toDouble() + ARRAY_SIZE / 2 - 1, goal.y.toDouble() + ARRAY_SIZE / 2 - 1),
         space = GridSpace(patencyArray)
