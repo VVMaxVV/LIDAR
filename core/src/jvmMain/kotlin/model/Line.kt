@@ -1,10 +1,10 @@
 package model
 
-import kotlin.math.abs
 import util.CHUNK_SIZE
 import util.compareTo
 import util.minus
 import util.plus
+import kotlin.math.abs
 
 data class Line(val startPoint: Point, val endPoint: Point) {
     fun getListChunksForLine(): List<Chunk> {
