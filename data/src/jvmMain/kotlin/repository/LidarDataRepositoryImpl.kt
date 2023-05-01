@@ -45,9 +45,11 @@ internal class LidarDataRepositoryImpl(
                 }
                 aabbBox?.let { box ->
                     val obstacleList = obstacleRepositoryImpl.getLinesWithinPoints(box.firstPoint, box.secondPoint)
+                    _listPointInterception.clear()
                     raysFactory.get(configuration, position).forEach { ray ->
                         getDistanceToAllIntersectionForRay(ray, obstacleList).also { allIntersectionDistanceForRay ->
                             getNearestInterceptionPoint(allIntersectionDistanceForRay)?.also {
+                                _listPointInterception.add(it)
                                 distanceToIntersection.add(toNearestObstacle(position.currentCoordinates.getDistance(it)))
                             }
                         }
@@ -92,9 +94,7 @@ internal class LidarDataRepositoryImpl(
     ): Point? {
         _position?.let { position ->
             if (allPointsIntersection.filterNotNull().isNotEmpty()) {
-                _listPointInterception.clear()
                 return allPointsIntersection.filterNotNull().minBy { position.currentCoordinates.getDistance(it) }
-                    .also { _listPointInterception.add(it) }
             }
         }
         return null

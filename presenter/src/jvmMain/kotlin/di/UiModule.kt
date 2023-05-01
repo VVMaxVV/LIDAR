@@ -7,6 +7,6 @@ import ui.MainWindow
 
 internal val uiModule = module {
     single { MainWindow() }
-    single { CanvasLidar(get(), get(), get(), get()) }
+    single { CanvasLidar(get(), get(), get()) }
     single { LidarParametersFragment(get(), get()) }
 }

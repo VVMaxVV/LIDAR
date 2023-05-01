@@ -4,9 +4,11 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -38,6 +40,7 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -46,6 +49,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
 import model.Point
+import model.Position
 import util.consts.DefaultValues
 import util.div
 import util.getX
@@ -54,7 +58,6 @@ import util.measureViewWidth
 import util.times
 import viewModel.CanvasLidarViewModel
 import viewModel.ControllerMovementsViewModel
-import viewModel.NavigationViewModel
 import viewModel.RayCalculationViewModel
 
 private const val CANVAS_VERTICAL_PADDING = 12f
@@ -64,17 +67,19 @@ private const val CANVAS_START_MARGIN = 64
 private const val RULER_FONT_SIZE = 16
 private const val ERROR_MESSAGE_MARGIN = 4
 private val canvasSize = Size(400f, 420f)
+private val goalPoint = Point(0, 10)
 
 internal class CanvasLidar(
     private val rayCalculationViewModel: RayCalculationViewModel,
     private val controllerMovementsViewModel: ControllerMovementsViewModel,
-    private val canvasLidarViewModel: CanvasLidarViewModel,
-    private val navigationViewModel: NavigationViewModel
+    private val canvasLidarViewModel: CanvasLidarViewModel
 ) {
     private var canvasViewSizeState by mutableStateOf<Size?>(null)
 
     private var rayConfiguration by mutableStateOf(rayCalculationViewModel.rayTracingConfiguration)
     private var apparentVisibility by mutableStateOf(rayCalculationViewModel.apparentVisibility)
+
+    private var currentPosition = mutableStateOf<Position?>(DefaultValues.startPosition)
 
     private lateinit var canvasReference: ConstrainedLayoutReference
     private lateinit var verticalCanvasRulerReference: ConstrainedLayoutReference
@@ -257,7 +262,9 @@ internal class CanvasLidar(
     }
 
     private fun setupConfigurationViewModels() {
-        controllerMovementsViewModel.setCurrentPosition(DefaultValues.startPosition)
+        currentPosition.let {
+            controllerMovementsViewModel.setCurrentPosition(it)
+        }
     }
 
     @Composable
@@ -338,18 +345,38 @@ internal class CanvasLidar(
         rayConfiguration.value?.let {
             Column(
                 Modifier.constrainAs(controlButtonsReference) {
-                    top.linkTo(horizontalCanvasRulerReference.bottom)
+                    top.linkTo(horizontalCanvasRulerReference.bottom, 4.dp)
                     start.linkTo(canvasReference.start)
                     end.linkTo(canvasReference.end)
                     width = Dimension.fillToConstraints
                 }
             ) {
+                val position by remember { currentPosition }
+                Row(Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "x: ${position?.currentCoordinates?.x?.toInt() ?: "null"}",
+                        modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = 4.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "y: ${position?.currentCoordinates?.y?.toInt() ?: "null"}",
+                        modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = 4.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Angle: ${
+                        position?.currentTiltAngle?.getAngleOnXPlane?.toInt()?.let { (360 - it) % 360 } ?: "null"
+                        }°",
+                        modifier = Modifier.weight(1f).border(1.dp, Color.Black).padding(vertical = 4.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        controllerMovementsViewModel.moveAlong(
-                            navigationViewModel.getPath(DefaultValues.startPosition, Point(0, 10))
-                        )
+                        currentPosition.value?.let {
+                            controllerMovementsViewModel.moveTo(goalPoint)
+                        }
                     }
                 ) {
                     Text("Start move")

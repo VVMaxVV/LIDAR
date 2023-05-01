@@ -1,11 +1,12 @@
 package util
 
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 import model.Line
 import model.Point
 import model.Ray
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 fun Number.toRadians() = this.toFloat() * PI / 180
 
@@ -98,3 +99,5 @@ fun getPointIntersectionOfLines(firstLine: Line, secondLine: Line): Point? {
 }
 
 fun isLineIntersection(firstLine: Line, secondLine: Line) = getPointIntersectionOfLines(firstLine, secondLine) != null
+
+fun Number.equals(other: Number, epsilon: Double) = abs(this.toDouble() - other.toDouble()) < epsilon

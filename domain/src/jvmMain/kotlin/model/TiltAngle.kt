@@ -1,12 +1,8 @@
 package model
 
-import kotlin.math.abs
-import util.minus
-import util.plus
 import util.rem
-import util.times
 
-data class TiltAngle(private var angleOnXPlane: Number = 0) {
+class TiltAngle(private var angleOnXPlane: Number = 0) {
     var getAngleOnXPlane: Number = angleOnXPlane
         private set
 
@@ -14,11 +10,12 @@ data class TiltAngle(private var angleOnXPlane: Number = 0) {
         getAngleOnXPlane %= 360
     }
 
-    fun rotateOnXPlane(angle: Number) {
-        getAngleOnXPlane = if (getAngleOnXPlane + angle < 0) {
-            360 - (abs(getAngleOnXPlane - angle * -1) % 360)
-        } else {
-            (getAngleOnXPlane + angle) % 360
+    fun rotateOnXPlane(angle: Number): TiltAngle {
+        var newAngle = (angleOnXPlane.toDouble() + angle.toDouble()) % 360
+        if (newAngle < 0) {
+            newAngle += 360
         }
+        getAngleOnXPlane = newAngle
+        return TiltAngle(getAngleOnXPlane)
     }
 }

@@ -1,26 +1,29 @@
 package viewModel
 
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import model.Line
 import model.Point
 import model.Position
 import model.TiltAngle
 import useCase.AddSeenPointUseCase
 import useCase.GetNearestObstaclesUseCase
+import useCase.GetPathUseCase
 import useCase.GetPointInterceptionUseCase
 import useCase.SetCurrentPositionUseCase
-import util.compareTo
 import util.consts.DefaultValues
+import util.equals
 import util.getX
 import util.getY
 import util.isLineIntersection
 import util.minus
 import util.plus
-import util.times
 
 internal class ControllerMovementsViewModel(
     private val rayCalculationViewModel: RayCalculationViewModel,
@@ -28,37 +31,40 @@ internal class ControllerMovementsViewModel(
     private val setCurrentPositionUseCase: SetCurrentPositionUseCase,
     private val getNearestObstaclesUseCase: GetNearestObstaclesUseCase,
     private val addSeenPointUseCase: AddSeenPointUseCase,
-    private val getPointInterceptionUseCase: GetPointInterceptionUseCase
+    private val getPointInterceptionUseCase: GetPointInterceptionUseCase,
+    private val getPathUseCase: GetPathUseCase
 ) {
-    private var currentPosition: Position? = null
+    private var currentPosition = mutableStateOf<Position?>(null)
 
-    fun moveAlong(points: List<Point>) {
+    fun moveTo(goal: Point) {
+        var isPathPossible = true
         CoroutineScope(Dispatchers.Default).launch {
-            currentPosition?.let { currentPosition ->
-                currentPosition.currentTiltAngle.rotateOnXPlane(currentPosition.currentTiltAngle.getAngleOnXPlane * -1)
-                setCurrentPositionUseCase.execute(currentPosition)
-                rayCalculationViewModel.fetchPointsInterception()
-                delay(500)
-                currentPosition.currentCoordinates.let { currentCoordinate ->
-                    for (point in points) {
-                        Thread.sleep(250)
-                        if (isMovingPossible(point)) {
+            currentPosition.value?.currentCoordinates?.let { currentCoordinate ->
+                while (isPathPossible) {
+                    val points = getPathUseCase.execute(currentCoordinate, goal)
+                    if (currentCoordinate.x.equals(points.last().x, 0.01) &&
+                        currentCoordinate.y.equals(points.last().y, 0.01)
+                    ) {
+                        break
+                    }
+                    if (points.isNotEmpty()) {
+                        for (point in points.drop(1)) {
                             when {
-                                point.x < currentCoordinate.x -> rotateUntil(TiltAngle(90))
-
-                                point.x > currentCoordinate.x -> rotateUntil(TiltAngle(270))
-
-                                point.y > currentCoordinate.y -> rotateUntil(TiltAngle(0))
-
-                                point.y < currentCoordinate.y -> rotateUntil(TiltAngle(180))
+                                currentCoordinate.y - point.y <= -0.9 -> rotateUntil(TiltAngle(0))
+                                currentCoordinate.x - point.x >= 0.9 -> rotateUntil(TiltAngle(90))
+                                currentCoordinate.y - point.y >= 0.9 -> rotateUntil(TiltAngle(180))
+                                currentCoordinate.x - point.x <= -0.9 -> rotateUntil(TiltAngle(270))
                             }
-                            currentCoordinate.moveTo(Offset(point.x.toFloat(), point.y.toFloat()))
-                            setCurrentPositionUseCase.execute(currentPosition)
-                            rayCalculationViewModel.fetchPointsInterception()
-                            canvasLidarViewModel.focusableOnCanvas()
-                        } else {
-                            break
+                            if (isMovingPossible(point)) {
+                                move(Movements.MoveForward)
+                                canvasLidarViewModel.focusableOnCanvas()
+                            } else {
+                                break
+                            }
+                            delay(100)
                         }
+                    } else {
+                        isPathPossible = false
                     }
                 }
             }
@@ -67,7 +73,7 @@ internal class ControllerMovementsViewModel(
 
     fun move(movements: Movements) {
         CoroutineScope(Dispatchers.Default).launch {
-            currentPosition?.let {
+            currentPosition.value?.let {
                 when (movements) {
                     Movements.MoveLeft -> {
                         val newCoordinate = Point(
@@ -75,12 +81,7 @@ internal class ControllerMovementsViewModel(
                             getY(-1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
                         )
                         if (isMovingPossible(newCoordinate)) {
-                            it.currentCoordinates.moveTo(
-                                Offset(
-                                    getX(-1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.x),
-                                    getY(-1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
-                                )
-                            )
+                            currentPosition.value = it.setCoordinate(newCoordinate)
                         }
                     }
 
@@ -90,12 +91,7 @@ internal class ControllerMovementsViewModel(
                             getY(1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
                         )
                         if (isMovingPossible(newCoordinate)) {
-                            it.currentCoordinates.moveTo(
-                                Offset(
-                                    getX(1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.x),
-                                    getY(1f, it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
-                                )
-                            )
+                            currentPosition.value = it.setCoordinate(newCoordinate)
                         }
                     }
 
@@ -105,12 +101,7 @@ internal class ControllerMovementsViewModel(
                             getY(1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
                         )
                         if (isMovingPossible(newCoordinate)) {
-                            it.currentCoordinates.moveTo(
-                                Offset(
-                                    getX(1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.x),
-                                    getY(1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
-                                )
-                            )
+                            currentPosition.value = it.setCoordinate(newCoordinate)
                         }
                     }
 
@@ -120,59 +111,65 @@ internal class ControllerMovementsViewModel(
                             getY(-1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
                         )
                         if (isMovingPossible(newCoordinate)) {
-                            it.currentCoordinates.moveTo(
-                                Offset(
-                                    getX(-1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.x),
-                                    getY(-1f, 90 + it.currentTiltAngle.getAngleOnXPlane, it.currentCoordinates.y)
-                                )
-                            )
+                            currentPosition.value = it.setCoordinate(newCoordinate)
                         }
                     }
 
-                    Movements.RotateClockwise -> it.currentTiltAngle.rotateOnXPlane(-5)
-                    Movements.RotateCounterclockwise -> it.currentTiltAngle.rotateOnXPlane(5)
+                    Movements.RotateClockwise -> currentPosition.value = it.rotateOnXPlane(-5f)
+
+                    Movements.RotateCounterclockwise -> currentPosition.value = it.rotateOnXPlane(5f)
                 }
-                setCurrentPositionUseCase.execute(it)
+                rayCalculationViewModel.fetchPointsInterception()
+            }
+        }
+    }
+
+    fun setCurrentPosition(position: MutableState<Position?>) {
+        CoroutineScope(Dispatchers.Default).launch {
+            currentPosition = position.also {
+                it.value?.let { position ->
+                    setCurrentPositionUseCase.execute(position)
+                }
                 addSeenPointUseCase.execute(getPointInterceptionUseCase.execute())
             }
         }
     }
 
-    fun setCurrentPosition(position: Position) {
-        currentPosition = position
-        setCurrentPositionUseCase.execute(position)
-    }
-
     private fun rotateTo(position: Position, angle: TiltAngle) {
-        val diff = (angle.getAngleOnXPlane - position.currentTiltAngle.getAngleOnXPlane + 360) % 360
-        if (diff <= 180) {
-            position.currentTiltAngle.rotateOnXPlane(10)
-        } else {
-            position.currentTiltAngle.rotateOnXPlane(-10)
+        currentPosition.value?.let {
+            val diff = (angle.getAngleOnXPlane - position.currentTiltAngle.getAngleOnXPlane + 360) % 360
+            if (diff <= 180) {
+                currentPosition.value = it.rotateOnXPlane(10f)
+            } else {
+                currentPosition.value = it.rotateOnXPlane(-10f)
+            }
         }
     }
 
     private suspend fun rotateUntil(angle: TiltAngle) {
-        currentPosition?.let { currentPosition ->
-            while (currentPosition.currentTiltAngle.getAngleOnXPlane.toInt() != angle.getAngleOnXPlane.toInt()) {
-                rotateTo(currentPosition, angle)
-                setCurrentPositionUseCase.execute(currentPosition)
+        currentPosition.let { positionState ->
+            while (currentPosition.value?.currentTiltAngle?.getAngleOnXPlane?.toInt() != angle.getAngleOnXPlane.toInt()) {
+                rotateTo(positionState.value!!, angle)
                 rayCalculationViewModel.fetchPointsInterception()
                 delay(100)
             }
         }
     }
 
-    private fun isMovingPossible(newPosition: Point): Boolean {
-        currentPosition?.currentCoordinates?.let { currentCoordinate ->
-            getNearestObstaclesUseCase.execute(
-                currentCoordinate,
-                DefaultValues.SIZE_CHECKED_ZONE_AROUND_POSITION / 2f
-            ).forEach {
-                if (isLineIntersection(Line(currentCoordinate, newPosition), it)) return false
+    private suspend fun isMovingPossible(newPosition: Point): Boolean {
+        return withContext(NonCancellable) {
+            currentPosition.value?.currentCoordinates?.let { currentCoordinate ->
+                getNearestObstaclesUseCase.execute(
+                    currentCoordinate,
+                    DefaultValues.SIZE_CHECKED_ZONE_AROUND_POSITION / 2f
+                ).forEach {
+                    if (isLineIntersection(Line(currentCoordinate, newPosition), it)) {
+                        return@withContext false
+                    }
+                }
             }
+            return@withContext true
         }
-        return true
     }
 
     sealed class Movements {
