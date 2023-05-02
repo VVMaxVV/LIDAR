@@ -3,13 +3,6 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
-    id("org.jlleitschuh.gradle.ktlint")
-}
-
-allprojects {
-    apply {
-        plugin("org.jlleitschuh.gradle.ktlint")
-    }
 }
 
 group = "com.example"
@@ -31,10 +24,10 @@ kotlin {
     sourceSets {
         val jvmMain by getting {
             dependencies {
-                implementation(project(":core"))
-                implementation(project(":data"))
-                implementation(project(":domain"))
-                implementation(project(":presenter"))
+                implementation(compose.desktop.currentOs)
+                implementation("io.insert-koin:koin-core:3.3.2")
+                implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+                implementation("io.github.woody230.ktx:compose-constraint-layout:5.0.0")
             }
         }
         val jvmTest by getting
