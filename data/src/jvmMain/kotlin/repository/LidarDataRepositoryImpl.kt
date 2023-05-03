@@ -7,11 +7,12 @@ import mapper.PointMapper
 import model.AABBBox
 import model.DistanceToCollision
 import model.Line
+import model.Point
 import model.Position
 import model.Ray
 import model.RayTracingConfiguration
 import util.compareTo
-import util.getDistanceToIntersection
+import util.getPointIntersectionOfLines
 
 internal class LidarDataRepositoryImpl(
     private val obstacleRepositoryImpl: ObstaclesRepository,
@@ -21,6 +22,8 @@ internal class LidarDataRepositoryImpl(
 ) : LidarDataRepository {
     private var _rayTracingConfiguration: RayTracingConfiguration? = null
     private var _position: Position? = null
+
+    private var _listPointInterception = mutableListOf<Point>()
 
     override fun getDistanceToObstaclesCollision(): List<DistanceToCollision> {
         val distanceToIntersection = mutableListOf<DistanceToCollision>()
@@ -42,10 +45,12 @@ internal class LidarDataRepositoryImpl(
                 }
                 aabbBox?.let { box ->
                     val obstacleList = obstacleRepositoryImpl.getLinesWithinPoints(box.firstPoint, box.secondPoint)
+                    _listPointInterception.clear()
                     raysFactory.get(configuration, position).forEach { ray ->
                         getDistanceToAllIntersectionForRay(ray, obstacleList).also { allIntersectionDistanceForRay ->
-                            getDistanceToNearestObstacle(allIntersectionDistanceForRay, configuration.maxLength).also {
-                                distanceToIntersection.add(it)
+                            getNearestInterceptionPoint(allIntersectionDistanceForRay)?.also {
+                                _listPointInterception.add(it)
+                                distanceToIntersection.add(toNearestObstacle(position.currentCoordinates.getDistance(it)))
                             }
                         }
                     }
@@ -63,10 +68,12 @@ internal class LidarDataRepositoryImpl(
         _position = currentPosition
     }
 
-    private fun getDistanceToAllIntersectionForRay(ray: Ray, obstaclesList: List<Line>): List<Number?> {
-        val allIntersectionDistanceForRay = mutableListOf<Number?>()
+    override fun getPointsInterception() = _listPointInterception
+
+    private fun getDistanceToAllIntersectionForRay(ray: Ray, obstaclesList: List<Line>): List<Point?> {
+        val allIntersectionDistanceForRay = mutableListOf<Point?>()
         obstaclesList.forEach { line ->
-            getDistanceToIntersection(
+            getPointIntersectionOfLines(
                 ray,
                 Ray(
                     Offset(line.startPoint.x.toFloat(), line.startPoint.y.toFloat()),
@@ -82,15 +89,22 @@ internal class LidarDataRepositoryImpl(
         return allIntersectionDistanceForRay
     }
 
-    private fun getDistanceToNearestObstacle(
-        allIntersectionDistanceForRay: List<Number?>,
-        maxLength: Number
+    private fun getNearestInterceptionPoint(
+        allPointsIntersection: List<Point?>
+    ): Point? {
+        _position?.let { position ->
+            if (allPointsIntersection.filterNotNull().isNotEmpty()) {
+                return allPointsIntersection.filterNotNull().minBy { position.currentCoordinates.getDistance(it) }
+            }
+        }
+        return null
+    }
+
+    private fun toNearestObstacle(
+        length: Number
     ): DistanceToCollision {
-        if (allIntersectionDistanceForRay.filterNotNull().isNotEmpty()) {
-            allIntersectionDistanceForRay.filterNotNull().minBy { it.toFloat() }
-                .also {
-                    if (it < maxLength) return DistanceToCollision.WithinMeasurement(it)
-                }
+        _rayTracingConfiguration?.let {
+            if (it.maxLength > length) return DistanceToCollision.WithinMeasurement(length)
         }
         return DistanceToCollision.OutOfBound
     }
