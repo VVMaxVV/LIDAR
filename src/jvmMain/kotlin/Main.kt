@@ -10,7 +10,7 @@ import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.get
 import ui.MainWindow
 
-private const val WINDOW_WIDTH = 1000
+private const val WINDOW_WIDTH = 1300
 
 fun main() = application {
     uploadModules()

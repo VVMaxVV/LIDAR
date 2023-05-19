@@ -40,6 +40,10 @@ internal class ControllerMovementsViewModel(
         var isPathPossible = true
         CoroutineScope(Dispatchers.Default).launch {
             currentPosition.value?.currentCoordinates?.let { currentCoordinate ->
+                currentCoordinate.apply {
+                    x.toInt()
+                    y.toInt()
+                }
                 while (isPathPossible) {
                     val points = getPathUseCase.execute(currentCoordinate, goal)
                     if (currentCoordinate.x.equals(points.last().x, 0.01) &&
