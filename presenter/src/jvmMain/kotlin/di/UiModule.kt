@@ -1,12 +1,12 @@
 package di
 
 import org.koin.dsl.module
-import ui.CanvasLidar
+import ui.CanvasLidarFragment
 import ui.LidarParametersFragment
 import ui.MainWindow
 
 internal val uiModule = module {
     single { MainWindow() }
-    single { CanvasLidar(get(), get(), get()) }
+    single { CanvasLidarFragment(get(), get(), get()) }
     single { LidarParametersFragment(get(), get()) }
 }

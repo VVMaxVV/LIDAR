@@ -25,8 +25,8 @@ internal class RayCalculationViewModel(
     private val _rayList = mutableStateOf<List<Ray>>(emptyList())
     val rayList: State<List<Ray>> get() = _rayList
 
-    private val _pointList = mutableStateOf<List<Offset>>(emptyList())
-    val pointList: State<List<Offset>> get() = _pointList
+    private val _pointList = mutableStateOf<List<Pair<Offset, Offset>>>(emptyList())
+    val pointList: State<List<Pair<Offset, Offset>>> get() = _pointList
 
     private var _apparentVisibility = mutableStateOf<Number?>(null)
     val apparentVisibility: State<Number?> get() = _apparentVisibility

@@ -12,7 +12,9 @@ import model.Position
 import model.Ray
 import model.RayTracingConfiguration
 import util.compareTo
+import util.div
 import util.getPointIntersectionOfLines
+import util.minus
 
 internal class LidarDataRepositoryImpl(
     private val obstacleRepositoryImpl: ObstaclesRepository,
@@ -46,7 +48,14 @@ internal class LidarDataRepositoryImpl(
                 aabbBox?.let { box ->
                     val obstacleList = obstacleRepositoryImpl.getLinesWithinPoints(box.firstPoint, box.secondPoint)
                     _listPointInterception.clear()
-                    raysFactory.get(configuration, position).forEach { ray ->
+                    raysFactory.get(
+                        RayTracingConfiguration(
+                            configuration.numbersOfRay - 1,
+                            configuration.horizontalFov - configuration.horizontalFov / configuration.numbersOfRay,
+                            configuration.maxLength
+                        ),
+                        position
+                    ).forEach { ray ->
                         getDistanceToAllIntersectionForRay(ray, obstacleList).also { allIntersectionDistanceForRay ->
                             getNearestInterceptionPoint(allIntersectionDistanceForRay)?.also {
                                 _listPointInterception.add(it)
