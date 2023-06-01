@@ -8,6 +8,7 @@ import org.koin.java.KoinJavaComponent.inject
 
 class MainWindow {
     private val canvasLidarFragment: CanvasLidarFragment by inject(CanvasLidarFragment::class.java)
+    private val miniMapFragment: MiniMapFragment by inject(MiniMapFragment::class.java)
     private val lidarParametersFragment: LidarParametersFragment by inject(LidarParametersFragment::class.java)
 
     @Preview
@@ -16,6 +17,7 @@ class MainWindow {
         MaterialTheme {
             Row {
                 canvasLidarFragment.display()
+                miniMapFragment.display()
                 lidarParametersFragment.display()
             }
         }

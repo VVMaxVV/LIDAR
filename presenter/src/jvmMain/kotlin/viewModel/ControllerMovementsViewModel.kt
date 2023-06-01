@@ -27,7 +27,7 @@ import util.plus
 
 internal class ControllerMovementsViewModel(
     private val rayCalculationViewModel: RayCalculationViewModel,
-    private val canvasLidarViewModel: CanvasLidarViewModel,
+    private val refreshContentCanvasViewModel: RefreshContentCanvasViewModel,
     private val setCurrentPositionUseCase: SetCurrentPositionUseCase,
     private val getNearestObstaclesUseCase: GetNearestObstaclesUseCase,
     private val addSeenPointUseCase: AddSeenPointUseCase,
@@ -61,7 +61,7 @@ internal class ControllerMovementsViewModel(
                             }
                             if (isMovingPossible(point)) {
                                 move(Movements.MoveForward)
-                                canvasLidarViewModel.focusableOnCanvas()
+                                refreshContentCanvasViewModel.refreshContent()
                             } else {
                                 break
                             }

@@ -56,9 +56,9 @@ import util.getX
 import util.measureViewHeight
 import util.measureViewWidth
 import util.times
-import viewModel.CanvasLidarViewModel
 import viewModel.ControllerMovementsViewModel
 import viewModel.RayCalculationViewModel
+import viewModel.RefreshContentCanvasViewModel
 
 private const val CANVAS_VERTICAL_PADDING = 12f
 private const val CANVAS_HORIZONTAL_PADDING = 12f
@@ -68,13 +68,13 @@ private const val RULER_FONT_SIZE = 16
 private const val ERROR_MESSAGE_MARGIN = 4
 private const val TEXT_COORDINATE_PADDING = 4
 private const val POSITION_VIEW_TOP_MARGIN = 4
-private val canvasSize = Size(600f, 420f)
+private val canvasSize = Size(600f, 400f)
 private val goalPoint = Point(0, 10)
 
 internal class CanvasLidarFragment(
     private val rayCalculationViewModel: RayCalculationViewModel,
     private val controllerMovementsViewModel: ControllerMovementsViewModel,
-    private val canvasLidarViewModel: CanvasLidarViewModel
+    private val refreshContentCanvasViewModel: RefreshContentCanvasViewModel
 ) {
     private var canvasViewSizeState by mutableStateOf<Size?>(null)
 
@@ -120,14 +120,20 @@ internal class CanvasLidarFragment(
     private fun ConstraintLayoutScope.printCanvas() {
         val requester = remember { FocusRequester() }
         LaunchedEffect(Unit) { requester.requestFocus() }
-        canvasLidarViewModel.setCanvasFocus(requester)
+        refreshContentCanvasViewModel.addFocus(requester)
         Canvas(
             Modifier.constrainAs(canvasReference) {
                 top.linkTo(parent.top, margin = CANVAS_TOP_MARGIN.dp)
                 start.linkTo(parent.start, margin = CANVAS_START_MARGIN.dp)
             }.size(canvasSize.width.dp, canvasSize.height.dp).background(Color.Black)
                 .padding(vertical = CANVAS_VERTICAL_PADDING.dp, horizontal = CANVAS_HORIZONTAL_PADDING.dp)
-                .onKeyEvent { handleKeyEvent(it) }
+                .onKeyEvent {
+                    if(handleKeyEvent(it)) {
+                        refreshContentCanvasViewModel.refreshContent(requester)
+                        return@onKeyEvent true
+                    }
+                    return@onKeyEvent false
+                }
                 .focusRequester(requester)
                 .focusable()
                 .onClick { requester.requestFocus() }
@@ -265,19 +271,6 @@ internal class CanvasLidarFragment(
                     color = DefaultValues.collisionPointsColor
                 )
             }
-//            for (i in 0 until pointList.size - 1) {
-//                val point = Point(pointList[i].x, pointList[i].y)
-//                if (point.getDistance(pointList[i + 1]) < 10)
-//                    drawPoints(
-//                        points = listOf(pointList[i], pointList[i + 1]),
-//                        pointMode = PointMode.Polygon,
-//                        strokeWidth = DefaultValues.COLLISION_POINTS_SIZE,
-//                        color = DefaultValues.collisionPointsColor
-//                    )
-//                else {
-//                    val a = 1
-//                }
-//            }
         }
     }
 
@@ -386,7 +379,7 @@ internal class CanvasLidarFragment(
                 )
                 Text(
                     text = "Angle: ${
-                    position?.currentTiltAngle?.getAngleOnXPlane?.toInt()?.let { (360 - it) % 360 } ?: "null"
+                        position?.currentTiltAngle?.getAngleOnXPlane?.toInt()?.let { (360 - it) % 360 } ?: "null"
                     }°",
                     modifier = Modifier.weight(1f).border(1.dp, Color.Black)
                         .padding(vertical = TEXT_COORDINATE_PADDING.dp),

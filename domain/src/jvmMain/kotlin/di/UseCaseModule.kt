@@ -2,17 +2,21 @@ package di
 
 import org.koin.dsl.module
 import useCase.AddSeenPointUseCase
+import useCase.GetCurrentPositionAsOffsetUseCase
 import useCase.GetDistanceToCollisionUseCase
 import useCase.GetNearestObstaclesUseCase
+import useCase.GetObstaclesAroundUseCase
 import useCase.GetPathUseCase
 import useCase.GetPointInterceptionUseCase
 import useCase.GetUiRaysUseCase
 import useCase.SetCurrentPositionUseCase
 import useCase.SetupRayTracingConfigurationUseCase
 import useCase.impl.AddSeenPointUseCaseImpl
+import useCase.impl.GetCurrentPositionAsOffsetUseCaseImpl
 import useCase.impl.GetDistanceToCollisionUseCaseImpl
 import useCase.impl.GetLidarUiRaysUseCaseImpl
 import useCase.impl.GetNearestObstaclesUseCaseImpl
+import useCase.impl.GetObstaclesAroundUseCaseImpl
 import useCase.impl.GetPathUseCaseImpl
 import useCase.impl.GetPointInterceptionUseCaseImpl
 import useCase.impl.SetCurrentPositionUseCaseImpl
@@ -27,4 +31,6 @@ internal val useCaseModule = module {
     single<GetPathUseCase> { GetPathUseCaseImpl(get()) }
     single<GetPointInterceptionUseCase> { GetPointInterceptionUseCaseImpl(get()) }
     single<AddSeenPointUseCase> { AddSeenPointUseCaseImpl(get()) }
+    single<GetObstaclesAroundUseCase> { GetObstaclesAroundUseCaseImpl(get()) }
+    single<GetCurrentPositionAsOffsetUseCase> { GetCurrentPositionAsOffsetUseCaseImpl(get()) }
 }

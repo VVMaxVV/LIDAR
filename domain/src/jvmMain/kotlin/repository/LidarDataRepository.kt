@@ -10,4 +10,5 @@ interface LidarDataRepository {
     fun setupConfiguration(configuration: RayTracingConfiguration)
     fun setCurrentPosition(currentPosition: Position)
     fun getPointsInterception(): List<Point>
+    fun getCurrentPosition(): Position?
 }

@@ -79,6 +79,8 @@ internal class LidarDataRepositoryImpl(
 
     override fun getPointsInterception() = _listPointInterception
 
+    override fun getCurrentPosition(): Position? = _position
+
     private fun getDistanceToAllIntersectionForRay(ray: Ray, obstaclesList: List<Line>): List<Point?> {
         val allIntersectionDistanceForRay = mutableListOf<Point?>()
         obstaclesList.forEach { line ->

@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import util.consts.DefaultValues
-import viewModel.CanvasLidarViewModel
 import viewModel.RayCalculationViewModel
+import viewModel.RefreshContentCanvasViewModel
 
 private const val COUNTER_WIDTH = 250
 private const val COUNTER_HORIZONTAL_PADDING = 12
@@ -45,7 +45,7 @@ private const val COUNTER_DESCRIPTION_MAX_LINE = 2
 
 internal class LidarParametersFragment(
     private val rayCalculationViewModel: RayCalculationViewModel,
-    private val canvasLidarViewModel: CanvasLidarViewModel
+    private val refreshContentCanvasViewModel: RefreshContentCanvasViewModel
 ) {
     @Composable
     fun display() {
@@ -123,7 +123,7 @@ internal class LidarParametersFragment(
                     measuredRayLength,
                     visibleRayLength
                 )
-                canvasLidarViewModel.focusableOnCanvas()
+                refreshContentCanvasViewModel.refreshContent()
             }) {
                 Text(text = "Set config", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
             }

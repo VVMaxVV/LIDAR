@@ -60,7 +60,9 @@ internal class ObstaclesFactory {
             for (
             x in minOf(topLeftPoint.getChunk().x, bottomRightPoint.getChunk().x)..maxOf(topLeftPoint.getChunk().x, bottomRightPoint.getChunk().x)
             ) {
-                mapObstacle[Chunk(x, y)]?.let { listLines.addAll(it) }
+                mapObstacle[Chunk(x, y)]?.let {
+                    listLines.addAll(it)
+                }
             }
         }
         return listLines.toList()
