@@ -11,7 +11,7 @@ class TiltAngle(private var angleOnXPlane: Number = 0) {
     }
 
     fun rotateOnXPlane(angle: Number): TiltAngle {
-        var newAngle = (angleOnXPlane.toDouble() + angle.toDouble()) % 360
+        var newAngle = (getAngleOnXPlane.toDouble() + angle.toDouble()) % 360
         if (newAngle < 0) {
             newAngle += 360
         }

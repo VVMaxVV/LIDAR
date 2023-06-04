@@ -14,20 +14,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import viewModel.MiniMapViewModel
+import viewModel.NavigationViewModel
 import viewModel.RefreshContentCanvasViewModel
-
-private const val CANVAS_VERTICAL_PADDING = 12f
 
 internal class MiniMapFragment(
     private val miniMapViewModel: MiniMapViewModel,
-    private val refreshContentCanvasViewModel: RefreshContentCanvasViewModel
+    private val refreshContentCanvasViewModel: RefreshContentCanvasViewModel,
+    private val navigationViewModel: NavigationViewModel
 ) {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
@@ -36,39 +36,53 @@ internal class MiniMapFragment(
         refreshContentCanvasViewModel.addFocus(requester)
         LaunchedEffect(Unit) { requester.requestFocus() }
         Box(Modifier.padding(16.dp)) {
-            Canvas(Modifier.size(400.dp).background(Color.Black)
-                .focusRequester(requester)
-                .focusable()
-                .onClick { requester.requestFocus() }
-                .graphicsLayer {
-                    translationX = 800f
-                    translationY = 800f
-                    scaleX = 4f
-                    scaleY = 4f
-                    rotationX = 180f
-                }.onKeyEvent {
-                    miniMapViewModel.fetchCurrentPosition()
-                    return@onKeyEvent false
-                }
+            Canvas(
+                Modifier.size(400.dp).background(Color.Black)
+                    .focusRequester(requester)
+                    .focusable()
+                    .onClick { requester.requestFocus() }
+                    .graphicsLayer {
+                        translationX = 800f
+                        translationY = 800f
+                        scaleX = 4f
+                        scaleY = 4f
+                        rotationX = 180f
+                    }
             ) {
                 drawObstacles()
                 drawCurrentPosition()
+                drawGoalPoint()
+                drawRays()
             }
         }
     }
 
     private fun DrawScope.drawObstacles() {
         miniMapViewModel.fetchObstacles()
-        val obstacleList = miniMapViewModel.obstaclesList.value
-        obstacleList.forEach {
+        miniMapViewModel.obstaclesList.value.forEach {
             drawLine(color = Color.White, it.start, it.end, 1f)
         }
     }
 
     private fun DrawScope.drawCurrentPosition() {
-        miniMapViewModel.fetchCurrentPosition()
-        miniMapViewModel.currentPosition.value?.let {
-            drawPoints(listOf(it), PointMode.Points, Color.Green, 1f)
+        navigationViewModel.currentPosition.value?.currentCoordinates?.let {
+            drawPoints(listOf(Offset(it.x.toFloat(), it.y.toFloat())), PointMode.Points, Color.Green, 1f)
         }
+    }
+
+    private fun DrawScope.drawGoalPoint() {
+        navigationViewModel.goalPoint.value?.let {
+            drawPoints(listOf(Offset(it.x.toFloat(), it.y.toFloat())), PointMode.Points, Color.Red, 1f)
+        }
+    }
+
+    private fun DrawScope.drawRays() {
+        miniMapViewModel.apply {
+            fetchRays()
+            ratListState.value.forEach {
+                drawLine(Color.White, it.start, it.end, 0.15f)
+            }
+        }
+        miniMapViewModel.fetchRays()
     }
 }

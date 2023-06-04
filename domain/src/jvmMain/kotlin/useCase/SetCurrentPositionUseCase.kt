@@ -3,5 +3,5 @@ package useCase
 import model.Position
 
 interface SetCurrentPositionUseCase {
-    fun execute(currentPosition: Position)
+    suspend fun execute(currentPosition: Position)
 }

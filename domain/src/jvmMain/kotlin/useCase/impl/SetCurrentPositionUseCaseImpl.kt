@@ -1,13 +1,14 @@
 package useCase.impl
 
 import model.Position
-import repository.LidarDataRepository
+import repository.CurrentPositionRepository
 import useCase.SetCurrentPositionUseCase
 
 internal class SetCurrentPositionUseCaseImpl(
-    private val lidarDataRepository: LidarDataRepository
+    private val currentPositionRepository: CurrentPositionRepository
 ) : SetCurrentPositionUseCase {
-    override fun execute(currentPosition: Position) {
-        lidarDataRepository.setCurrentPosition(currentPosition)
+    override suspend fun execute(currentPosition: Position) {
+        currentPositionRepository.setCurrentPosition(currentPosition)
+//        lidarDataRepository.setCurrentPosition(currentPosition)
     }
 }

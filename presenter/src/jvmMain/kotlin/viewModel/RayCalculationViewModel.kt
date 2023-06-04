@@ -9,7 +9,9 @@ import kotlinx.coroutines.launch
 import mapper.DistanceToCollisionMapper
 import model.Ray
 import model.RayTracingConfiguration
+import useCase.AddSeenPointUseCase
 import useCase.GetDistanceToCollisionUseCase
+import useCase.GetPointInterceptionUseCase
 import useCase.GetUiRaysUseCase
 import useCase.SetupRayTracingConfigurationUseCase
 import util.exception.ApparentVisibilityIsNullException
@@ -20,7 +22,9 @@ internal class RayCalculationViewModel(
     private val getUiRaysUseCase: GetUiRaysUseCase,
     private val setupRayTracingConfigurationUseCase: SetupRayTracingConfigurationUseCase,
     private val getDistanceToCollisionUseCase: GetDistanceToCollisionUseCase,
-    private val distanceToCollisionMapper: DistanceToCollisionMapper
+    private val distanceToCollisionMapper: DistanceToCollisionMapper,
+    private val addSeenPointUseCase: AddSeenPointUseCase,
+    private val getPointInterceptionUseCase: GetPointInterceptionUseCase
 ) {
     private val _rayList = mutableStateOf<List<Ray>>(emptyList())
     val rayList: State<List<Ray>> get() = _rayList
@@ -52,7 +56,7 @@ internal class RayCalculationViewModel(
 
     fun fetchPointsInterception() {
         CoroutineScope(Dispatchers.Default).launch {
-            getDistanceToCollisionUseCase.execute().also {
+            getDistanceToCollisionUseCase.execute().collect {
                 try {
                     _pointList.value =
                         distanceToCollisionMapper.toOffsetsOnView(
@@ -60,6 +64,7 @@ internal class RayCalculationViewModel(
                             _apparentVisibility.value ?: throw ApparentVisibilityIsNullException(),
                             _rayTracingConfiguration.value ?: throw RayTracingConfigurationIsNullException()
                         )
+                    addSeenPointUseCase.execute(getPointInterceptionUseCase.execute())
                     _errorText.value = null
                 } catch (e: Exception) {
                     handleError(e)

@@ -1,16 +1,16 @@
 package useCase.impl
 
 import androidx.compose.ui.geometry.Offset
-import repository.LidarDataRepository
+import repository.CurrentPositionRepository
 import useCase.GetCurrentPositionAsOffsetUseCase
 
 internal class GetCurrentPositionAsOffsetUseCaseImpl(
-    private val lidarDataRepository: LidarDataRepository
+    private val currentPositionRepository: CurrentPositionRepository
 ) :
     GetCurrentPositionAsOffsetUseCase {
     override fun execute(): Offset? {
-        return lidarDataRepository.getCurrentPosition()?.currentCoordinates?.let {
-            Offset(it.x.toFloat(),it.y.toFloat())
+        return currentPositionRepository.getCurrentPosition().value?.currentCoordinates?.let {
+            Offset(it.x.toFloat(), it.y.toFloat())
         }
     }
 }

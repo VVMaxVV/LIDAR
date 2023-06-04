@@ -2,32 +2,35 @@ package viewModel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.geometry.Offset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import model.LineByOffset
-import model.Point
-import useCase.GetCurrentPositionAsOffsetUseCase
+import model.Ray
 import useCase.GetObstaclesAroundUseCase
+import useCase.GetRaysOnPlaneUseCase
 
 internal class MiniMapViewModel(
     private val getObstaclesAroundUseCase: GetObstaclesAroundUseCase,
-    private val getCurrentPositionAsOffsetUseCase: GetCurrentPositionAsOffsetUseCase
+    private val getRaysOnPlaneUseCase: GetRaysOnPlaneUseCase
 ) {
     private var _obstaclesList = mutableStateOf<List<LineByOffset>>(emptyList())
     val obstaclesList: State<List<LineByOffset>> get() = _obstaclesList
 
-    private var _currentPosition = mutableStateOf(getCurrentPositionAsOffsetUseCase.execute())
-    val currentPosition: State<Offset?> get() = _currentPosition
+    private val _rayListState = mutableStateOf<List<Ray>>(emptyList())
+    val ratListState: State<List<Ray>> get() = _rayListState
 
     fun fetchObstacles() {
         CoroutineScope(Dispatchers.Default).launch {
-            _obstaclesList.value = getObstaclesAroundUseCase.execute(Point(0, 0), 50)
+            _obstaclesList.value = getObstaclesAroundUseCase.execute(50)
         }
     }
 
-    fun fetchCurrentPosition() {
-        _currentPosition.value = getCurrentPositionAsOffsetUseCase.execute()
+    fun fetchRays() {
+        CoroutineScope(Dispatchers.Default).launch {
+            getRaysOnPlaneUseCase.execute().collect {
+                _rayListState.value = it
+            }
+        }
     }
 }
