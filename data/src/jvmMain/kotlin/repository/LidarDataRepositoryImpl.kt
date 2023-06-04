@@ -1,7 +1,13 @@
 package repository
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import factory.RaysFactory
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import mapper.OffsetMapper
 import mapper.PointMapper
 import model.AABBBox
@@ -21,63 +27,69 @@ internal class LidarDataRepositoryImpl(
     private val raysFactory: RaysFactory,
     private val pointMapper: PointMapper,
     private val offsetMapper: OffsetMapper
-) : LidarDataRepository {
-    private var _rayTracingConfiguration: RayTracingConfiguration? = null
-    private var _position: Position? = null
+) : LidarDataRepository, CurrentPositionRepository {
+    private var rayTracingConfiguration: RayTracingConfiguration? = null
+    private var position = mutableStateOf<Position?>(null)
 
-    private var _listPointInterception = mutableListOf<Point>()
+    private val distanceToCollisionFlow = MutableSharedFlow<List<DistanceToCollision>>(extraBufferCapacity = 1)
+    private val rayListFlow = MutableStateFlow<List<Ray>>(emptyList())
 
-    override fun getDistanceToObstaclesCollision(): List<DistanceToCollision> {
+    private var listPointInterception = mutableListOf<Point>()
+
+    override fun getDistanceToObstaclesCollision(): SharedFlow<List<DistanceToCollision>> = distanceToCollisionFlow
+
+    override fun getRays(): Flow<List<Ray>> = rayListFlow
+
+    override fun setupConfiguration(configuration: RayTracingConfiguration) {
+        rayTracingConfiguration = configuration
+    }
+
+    override fun getPointsInterception() = listPointInterception
+
+    override fun getCurrentPosition(): State<Position?> = position
+
+    override suspend fun setCurrentPosition(position: Position) {
+        this.position.value = position
         val distanceToIntersection = mutableListOf<DistanceToCollision>()
-        _rayTracingConfiguration?.let { configuration ->
-            _position?.let { position ->
-                val aabbBox: AABBBox?
+        rayTracingConfiguration?.let { configuration ->
+            val aabbBox: AABBBox?
+            raysFactory.get(
+                RayTracingConfiguration(3, configuration.horizontalFov, configuration.maxLength),
+                position
+            ).also { rayList ->
+                aabbBox =
+                    pointMapper.getAABBBox(
+                        mutableSetOf(offsetMapper.toPoint(rayList[0].start)).also { pointSet ->
+                            rayList.forEach {
+                                pointSet.add(offsetMapper.toPoint(it.end))
+                            }
+                        }.toList()
+                    )
+            }
+            aabbBox?.let { box ->
+                val obstacleList = obstacleRepositoryImpl.getLinesWithinPoints(box.firstPoint, box.secondPoint)
+                listPointInterception.clear()
                 raysFactory.get(
-                    RayTracingConfiguration(3, configuration.horizontalFov, configuration.maxLength),
+                    RayTracingConfiguration(
+                        configuration.numbersOfRay - 1,
+                        configuration.horizontalFov - configuration.horizontalFov / configuration.numbersOfRay,
+                        configuration.maxLength
+                    ),
                     position
-                ).also { rayList ->
-                    aabbBox =
-                        pointMapper.getAABBBox(
-                            mutableSetOf(offsetMapper.toPoint(rayList[0].start)).also { pointSet ->
-                                rayList.forEach {
-                                    pointSet.add(offsetMapper.toPoint(it.end))
-                                }
-                            }.toList()
-                        )
-                }
-                aabbBox?.let { box ->
-                    val obstacleList = obstacleRepositoryImpl.getLinesWithinPoints(box.firstPoint, box.secondPoint)
-                    _listPointInterception.clear()
-                    raysFactory.get(
-                        RayTracingConfiguration(
-                            configuration.numbersOfRay - 1,
-                            configuration.horizontalFov - configuration.horizontalFov / configuration.numbersOfRay,
-                            configuration.maxLength
-                        ),
-                        position
-                    ).forEach { ray ->
-                        getDistanceToAllIntersectionForRay(ray, obstacleList).also { allIntersectionDistanceForRay ->
-                            getNearestInterceptionPoint(allIntersectionDistanceForRay)?.also {
-                                _listPointInterception.add(it)
-                                distanceToIntersection.add(toNearestObstacle(position.currentCoordinates.getDistance(it)))
+                ).also { rayListFlow.value = it }.forEach { ray ->
+                    getDistanceToAllIntersectionForRay(ray, obstacleList).also { allIntersectionDistanceForRay ->
+                        getNearestInterceptionPoint(allIntersectionDistanceForRay)?.also { point ->
+                            listPointInterception.add(point)
+                            toNearestObstacle(position.currentCoordinates.getDistance(point)).also {
+                                distanceToIntersection.add(it)
                             }
                         }
                     }
                 }
             }
         }
-        return distanceToIntersection
+        distanceToCollisionFlow.emit(distanceToIntersection)
     }
-
-    override fun setupConfiguration(configuration: RayTracingConfiguration) {
-        _rayTracingConfiguration = configuration
-    }
-
-    override fun setCurrentPosition(currentPosition: Position) {
-        _position = currentPosition
-    }
-
-    override fun getPointsInterception() = _listPointInterception
 
     private fun getDistanceToAllIntersectionForRay(ray: Ray, obstaclesList: List<Line>): List<Point?> {
         val allIntersectionDistanceForRay = mutableListOf<Point?>()
@@ -101,7 +113,7 @@ internal class LidarDataRepositoryImpl(
     private fun getNearestInterceptionPoint(
         allPointsIntersection: List<Point?>
     ): Point? {
-        _position?.let { position ->
+        position.value?.let { position ->
             if (allPointsIntersection.filterNotNull().isNotEmpty()) {
                 return allPointsIntersection.filterNotNull().minBy { position.currentCoordinates.getDistance(it) }
             }
@@ -112,7 +124,7 @@ internal class LidarDataRepositoryImpl(
     private fun toNearestObstacle(
         length: Number
     ): DistanceToCollision {
-        _rayTracingConfiguration?.let {
+        rayTracingConfiguration?.let {
             if (it.maxLength > length) return DistanceToCollision.WithinMeasurement(length)
         }
         return DistanceToCollision.OutOfBound

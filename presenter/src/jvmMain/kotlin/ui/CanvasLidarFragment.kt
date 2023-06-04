@@ -4,17 +4,13 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.onClick
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +36,6 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -48,7 +43,7 @@ import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
-import model.Point
+import model.Movements
 import model.Position
 import util.consts.DefaultValues
 import util.div
@@ -56,9 +51,10 @@ import util.getX
 import util.measureViewHeight
 import util.measureViewWidth
 import util.times
-import viewModel.CanvasLidarViewModel
 import viewModel.ControllerMovementsViewModel
+import viewModel.NavigationViewModel
 import viewModel.RayCalculationViewModel
+import viewModel.RefreshContentCanvasViewModel
 
 private const val CANVAS_VERTICAL_PADDING = 12f
 private const val CANVAS_HORIZONTAL_PADDING = 12f
@@ -66,15 +62,13 @@ private const val CANVAS_TOP_MARGIN = 16
 private const val CANVAS_START_MARGIN = 64
 private const val RULER_FONT_SIZE = 16
 private const val ERROR_MESSAGE_MARGIN = 4
-private const val TEXT_COORDINATE_PADDING = 4
-private const val POSITION_VIEW_TOP_MARGIN = 4
-private val canvasSize = Size(600f, 420f)
-private val goalPoint = Point(0, 10)
+private val canvasSize = Size(600f, 400f)
 
 internal class CanvasLidarFragment(
     private val rayCalculationViewModel: RayCalculationViewModel,
     private val controllerMovementsViewModel: ControllerMovementsViewModel,
-    private val canvasLidarViewModel: CanvasLidarViewModel
+    private val refreshContentCanvasViewModel: RefreshContentCanvasViewModel,
+    private val navigationViewModel: NavigationViewModel
 ) {
     private var canvasViewSizeState by mutableStateOf<Size?>(null)
 
@@ -99,8 +93,6 @@ internal class CanvasLidarFragment(
                 printCanvas()
                 printVerticalCanvasRulerLabel()
                 printHorizontalCanvasRulerLabel()
-                printCurrentPosition()
-                printControlButtons()
                 handleErrorMessage()
             }
         }
@@ -120,14 +112,20 @@ internal class CanvasLidarFragment(
     private fun ConstraintLayoutScope.printCanvas() {
         val requester = remember { FocusRequester() }
         LaunchedEffect(Unit) { requester.requestFocus() }
-        canvasLidarViewModel.setCanvasFocus(requester)
+        refreshContentCanvasViewModel.addFocus(requester)
         Canvas(
             Modifier.constrainAs(canvasReference) {
                 top.linkTo(parent.top, margin = CANVAS_TOP_MARGIN.dp)
                 start.linkTo(parent.start, margin = CANVAS_START_MARGIN.dp)
             }.size(canvasSize.width.dp, canvasSize.height.dp).background(Color.Black)
                 .padding(vertical = CANVAS_VERTICAL_PADDING.dp, horizontal = CANVAS_HORIZONTAL_PADDING.dp)
-                .onKeyEvent { handleKeyEvent(it) }
+                .onKeyEvent {
+                    if (handleKeyEvent(it)) {
+                        refreshContentCanvasViewModel.refreshContent(requester)
+                        return@onKeyEvent true
+                    }
+                    return@onKeyEvent false
+                }
                 .focusRequester(requester)
                 .focusable()
                 .onClick { requester.requestFocus() }
@@ -213,27 +211,27 @@ internal class CanvasLidarFragment(
     private fun handleKeyEvent(keyEvent: KeyEvent): Boolean {
         when (keyEvent.key) {
             Key.A -> {
-                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.MoveLeft)
+                controllerMovementsViewModel.move(Movements.MoveLeft)
             }
 
             Key.D -> {
-                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.MoveRight)
+                controllerMovementsViewModel.move(Movements.MoveRight)
             }
 
             Key.W -> {
-                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.MoveForward)
+                controllerMovementsViewModel.move(Movements.MoveForward)
             }
 
             Key.S -> {
-                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.MoveBackward)
+                controllerMovementsViewModel.move(Movements.MoveBackward)
             }
 
             Key.DirectionRight -> {
-                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.RotateClockwise)
+                controllerMovementsViewModel.move(Movements.RotateClockwise)
             }
 
             Key.DirectionLeft -> {
-                controllerMovementsViewModel.move(ControllerMovementsViewModel.Movements.RotateCounterclockwise)
+                controllerMovementsViewModel.move(Movements.RotateCounterclockwise)
             }
 
             else -> {
@@ -265,25 +263,12 @@ internal class CanvasLidarFragment(
                     color = DefaultValues.collisionPointsColor
                 )
             }
-//            for (i in 0 until pointList.size - 1) {
-//                val point = Point(pointList[i].x, pointList[i].y)
-//                if (point.getDistance(pointList[i + 1]) < 10)
-//                    drawPoints(
-//                        points = listOf(pointList[i], pointList[i + 1]),
-//                        pointMode = PointMode.Polygon,
-//                        strokeWidth = DefaultValues.COLLISION_POINTS_SIZE,
-//                        color = DefaultValues.collisionPointsColor
-//                    )
-//                else {
-//                    val a = 1
-//                }
-//            }
         }
     }
 
     private fun setupConfigurationViewModels() {
-        currentPosition.let {
-            controllerMovementsViewModel.setCurrentPosition(it)
+        currentPosition.value?.let {
+            navigationViewModel.setCurrentPosition(it)
         }
     }
 
@@ -355,67 +340,6 @@ internal class CanvasLidarFragment(
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun ConstraintLayoutScope.printCurrentPosition() {
-        rayConfiguration.value?.let {
-            val position by remember { currentPosition }
-            Row(
-                Modifier.constrainAs(currentPositionViewReference) {
-                    top.linkTo(horizontalCanvasRulerReference.bottom, margin = POSITION_VIEW_TOP_MARGIN.dp)
-                    start.linkTo(canvasReference.start)
-                    end.linkTo(canvasReference.end)
-                    width = Dimension.fillToConstraints
-                }
-            ) {
-                Text(
-                    text = "x: ${position?.currentCoordinates?.x?.toInt() ?: "null"}",
-                    modifier = Modifier.weight(1f).border(1.dp, Color.Black)
-                        .padding(vertical = TEXT_COORDINATE_PADDING.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "y: ${position?.currentCoordinates?.y?.toInt() ?: "null"}",
-                    modifier = Modifier.weight(1f).border(1.dp, Color.Black)
-                        .padding(vertical = TEXT_COORDINATE_PADDING.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Angle: ${
-                    position?.currentTiltAngle?.getAngleOnXPlane?.toInt()?.let { (360 - it) % 360 } ?: "null"
-                    }°",
-                    modifier = Modifier.weight(1f).border(1.dp, Color.Black)
-                        .padding(vertical = TEXT_COORDINATE_PADDING.dp),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun ConstraintLayoutScope.printControlButtons() {
-        rayConfiguration.value?.let {
-            Column(
-                Modifier.constrainAs(controlButtonsReference) {
-                    top.linkTo(currentPositionViewReference.bottom, 4.dp)
-                    start.linkTo(canvasReference.start)
-                    end.linkTo(canvasReference.end)
-                    width = Dimension.fillToConstraints
-                }
-            ) {
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        currentPosition.value?.let {
-                            controllerMovementsViewModel.moveTo(goalPoint)
-                        }
-                    }
-                ) {
-                    Text("Start move")
                 }
             }
         }

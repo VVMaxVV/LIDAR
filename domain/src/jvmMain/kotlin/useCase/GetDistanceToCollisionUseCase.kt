@@ -1,7 +1,8 @@
 package useCase
 
+import kotlinx.coroutines.flow.SharedFlow
 import model.DistanceToCollision
 
 interface GetDistanceToCollisionUseCase {
-    fun execute(): List<DistanceToCollision>
+    fun execute(): SharedFlow<List<DistanceToCollision>>
 }
