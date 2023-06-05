@@ -53,6 +53,7 @@ internal class MiniMapFragment(
                 drawCurrentPosition()
                 drawGoalPoint()
                 drawRays()
+                drawTrajectory()
             }
         }
     }
@@ -84,5 +85,13 @@ internal class MiniMapFragment(
             }
         }
         miniMapViewModel.fetchRays()
+    }
+
+    private fun DrawScope.drawTrajectory() {
+        miniMapViewModel.trajectory.value.map {
+            Offset(it.x.toFloat(), it.y.toFloat())
+        }.also {
+            drawPoints(it, PointMode.Polygon, Color.Blue, 1f)
+        }
     }
 }

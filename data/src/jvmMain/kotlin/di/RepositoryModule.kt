@@ -9,6 +9,8 @@ import repository.ObstaclesRepository
 import repository.ObstaclesRepositoryImpl
 import repository.PathRepository
 import repository.PathRepositoryImpl
+import repository.TrajectoryRepository
+import repository.TrajectoryRepositoryImpl
 import repository.UiRepository
 import repository.UiRepositoryImpl
 
@@ -19,4 +21,5 @@ internal val repositoryModule = module {
     single<PathRepository> { PathRepositoryImpl(get()) }
     single<CurrentPositionRepository> { get<LidarDataRepository>() as LidarDataRepositoryImpl }
     single<GoalPointRepository> { get<PathRepository>() as PathRepositoryImpl }
+    single<TrajectoryRepository> { TrajectoryRepositoryImpl() }
 }

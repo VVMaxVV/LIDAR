@@ -9,16 +9,20 @@ import model.LineByOffset
 import model.Ray
 import useCase.GetObstaclesAroundUseCase
 import useCase.GetRaysOnPlaneUseCase
+import useCase.GetTrajectoryUseCase
 
 internal class MiniMapViewModel(
     private val getObstaclesAroundUseCase: GetObstaclesAroundUseCase,
-    private val getRaysOnPlaneUseCase: GetRaysOnPlaneUseCase
+    private val getRaysOnPlaneUseCase: GetRaysOnPlaneUseCase,
+    getTrajectoryUseCase: GetTrajectoryUseCase
 ) {
     private var _obstaclesList = mutableStateOf<List<LineByOffset>>(emptyList())
     val obstaclesList: State<List<LineByOffset>> get() = _obstaclesList
 
     private val _rayListState = mutableStateOf<List<Ray>>(emptyList())
-    val ratListState: State<List<Ray>> get() = _rayListState
+    val rayListState: State<List<Ray>> get() = _rayListState
+
+    val trajectory = getTrajectoryUseCase.execute()
 
     fun fetchObstacles() {
         CoroutineScope(Dispatchers.Default).launch {

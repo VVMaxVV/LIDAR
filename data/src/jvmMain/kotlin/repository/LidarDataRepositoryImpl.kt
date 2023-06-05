@@ -5,9 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import factory.RaysFactory
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import mapper.OffsetMapper
 import mapper.PointMapper
 import model.AABBBox
@@ -31,12 +30,12 @@ internal class LidarDataRepositoryImpl(
     private var rayTracingConfiguration: RayTracingConfiguration? = null
     private var position = mutableStateOf<Position?>(null)
 
-    private val distanceToCollisionFlow = MutableSharedFlow<List<DistanceToCollision>>(extraBufferCapacity = 1)
+    private val distanceToCollisionFlow = MutableStateFlow<List<DistanceToCollision>>(emptyList())
     private val rayListFlow = MutableStateFlow<List<Ray>>(emptyList())
 
     private var listPointInterception = mutableListOf<Point>()
 
-    override fun getDistanceToObstaclesCollision(): SharedFlow<List<DistanceToCollision>> = distanceToCollisionFlow
+    override fun getDistanceToObstaclesCollision(): StateFlow<List<DistanceToCollision>> = distanceToCollisionFlow
 
     override fun getRays(): Flow<List<Ray>> = rayListFlow
 
