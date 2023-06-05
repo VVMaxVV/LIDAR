@@ -9,6 +9,5 @@ internal class SetCurrentPositionUseCaseImpl(
 ) : SetCurrentPositionUseCase {
     override suspend fun execute(currentPosition: Position) {
         currentPositionRepository.setCurrentPosition(currentPosition)
-//        lidarDataRepository.setCurrentPosition(currentPosition)
     }
 }

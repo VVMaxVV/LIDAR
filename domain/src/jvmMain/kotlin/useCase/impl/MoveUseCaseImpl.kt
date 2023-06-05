@@ -4,6 +4,7 @@ import exception.CurrentPositionNotDefinedException
 import model.Movements
 import model.Point
 import repository.CurrentPositionRepository
+import repository.TrajectoryRepository
 import useCase.IsMovePossibleUseCase
 import useCase.MoveUseCase
 import util.getX
@@ -12,7 +13,8 @@ import util.plus
 
 internal class MoveUseCaseImpl(
     private val currentPositionRepository: CurrentPositionRepository,
-    private val isMovePossibleUseCase: IsMovePossibleUseCase
+    private val isMovePossibleUseCase: IsMovePossibleUseCase,
+    private val trajectoryRepository: TrajectoryRepository
 ) : MoveUseCase {
     override suspend fun execute(movements: Movements) {
         (currentPositionRepository.getCurrentPosition().value ?: throw CurrentPositionNotDefinedException()).let {
@@ -60,6 +62,9 @@ internal class MoveUseCaseImpl(
                 Movements.RotateClockwise -> currentPositionRepository.setCurrentPosition(it.rotateOnXPlane(-5f))
 
                 Movements.RotateCounterclockwise -> currentPositionRepository.setCurrentPosition(it.rotateOnXPlane(5f))
+            }
+            it.currentCoordinates.apply {
+                trajectoryRepository.addPoint(Point(x, y))
             }
         }
     }

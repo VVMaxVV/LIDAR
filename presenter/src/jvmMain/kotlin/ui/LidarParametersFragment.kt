@@ -53,7 +53,7 @@ internal class LidarParametersFragment(
         var fovCounter by rememberSaveable { mutableStateOf<Number>(DefaultValues.DEFAULT_HORIZONTAL_FOV) }
         var visibleRayLength by rememberSaveable { mutableStateOf<Number>(DefaultValues.DEFAULT_APPARENT_RAY_LENGTH) }
         var measuredRayLength by rememberSaveable { mutableStateOf<Number>(DefaultValues.DEFAULT_MEASURE_RAY_LENGTH) }
-        Column(modifier = Modifier.padding(horizontal = ROOT_HORIZONTAL_PADDING.dp)) {
+        Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = COUNTER_ITEM_VERTICAL_PADDING.dp)

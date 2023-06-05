@@ -38,7 +38,7 @@ internal class ToastNotification(private val toastViewModel: ToastViewModel) {
                     modifier = Modifier
                         .padding(16.dp)
                         .height(48.dp)
-                        .background(Color.Gray, RoundedCornerShape(20))
+                        .background(Color(0xFFD7D7D7), RoundedCornerShape(50))
                 ) {
                     Text(
                         text = it.message,

@@ -1,14 +1,14 @@
 package repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import model.DistanceToCollision
 import model.Point
 import model.Ray
 import model.RayTracingConfiguration
 
 interface LidarDataRepository {
-    fun getDistanceToObstaclesCollision(): SharedFlow<List<DistanceToCollision>>
+    fun getDistanceToObstaclesCollision(): StateFlow<List<DistanceToCollision>>
 
     fun getRays(): Flow<List<Ray>>
 
