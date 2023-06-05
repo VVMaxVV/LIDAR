@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +20,7 @@ class MainWindow {
     private val lidarParametersFragment: LidarParametersFragment by inject(LidarParametersFragment::class.java)
     private val menuControlFragment: MenuControlFragment by inject(MenuControlFragment::class.java)
     private val toastNotification: ToastNotification by inject(ToastNotification::class.java)
+    private val miniMapMenuFragment: MiniMapMenuFragment by inject(MiniMapMenuFragment::class.java)
 
     @Preview
     @Composable
@@ -27,12 +28,15 @@ class MainWindow {
         MaterialTheme {
             Box(Modifier.fillMaxSize()) {
                 Row {
-                    Column(Modifier.width(700.dp)) {
+                    Column(Modifier.weight(1f)) {
                         canvasLidarFragment.display()
                         menuControlFragment.display()
                     }
-                    Row(Modifier.weight(1f)) {
+                    Column(Modifier.weight(0.75f).padding(horizontal = 16.dp)) {
                         miniMapFragment.display()
+                        miniMapMenuFragment.display()
+                    }
+                    Box(Modifier.weight(0.75f)) {
                         lidarParametersFragment.display()
                     }
                 }

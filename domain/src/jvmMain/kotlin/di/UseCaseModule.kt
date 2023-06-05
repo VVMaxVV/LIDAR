@@ -2,6 +2,7 @@ package di
 
 import org.koin.dsl.module
 import useCase.AddSeenPointUseCase
+import useCase.ClearTrajectoryUseCase
 import useCase.GetCurrentPositionAsOffsetUseCase
 import useCase.GetCurrentPositionUseCase
 import useCase.GetDistanceToCollisionUseCase
@@ -20,6 +21,7 @@ import useCase.SetCurrentPositionUseCase
 import useCase.SetGoalPointUseCase
 import useCase.SetupRayTracingConfigurationUseCase
 import useCase.impl.AddSeenPointUseCaseImpl
+import useCase.impl.ClearTrajectoryUseCaseImpl
 import useCase.impl.GetCurrentPositionAsOffsetUseCaseImpl
 import useCase.impl.GetCurrentPositionUseCaseImpl
 import useCase.impl.GetDistanceToCollisionUseCaseImpl
@@ -57,4 +59,5 @@ internal val useCaseModule = module {
     single<MoveToGoalUseCase> { MoveToGoalUseCaseImpl(get(), get(), get(), get(), get()) }
     single<GetRaysOnPlaneUseCase> { GetRaysOnPlaneUseCaseImpl(get()) }
     single<GetTrajectoryUseCase> { GetTrajectoryUseCaseImpl(get()) }
+    single<ClearTrajectoryUseCase> { ClearTrajectoryUseCaseImpl(get()) }
 }

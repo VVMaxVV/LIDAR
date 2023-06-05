@@ -12,7 +12,9 @@ class LimitedSizeList<T>(private val maxSize: Int) : List<T> {
         }
     }
 
-    fun getAll(): List<T> = list.toList()
+    fun clear() {
+        list.clear()
+    }
 
     override fun iterator(): Iterator<T> = list.iterator()
 

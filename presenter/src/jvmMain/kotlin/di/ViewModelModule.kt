@@ -12,7 +12,7 @@ internal val viewModelModule = module {
     single { RayCalculationViewModel(get(), get(), get(), get(), get(), get()) }
     single { ControllerMovementsViewModel(get(), get()) }
     single { RefreshContentCanvasViewModel() }
-    single { MiniMapViewModel(get(), get(), get()) }
+    single { MiniMapViewModel(get(), get(), get(), get()) }
     single { NavigationViewModel(get(), get(), get(), get()) }
     single { ToastViewModel() }
 }

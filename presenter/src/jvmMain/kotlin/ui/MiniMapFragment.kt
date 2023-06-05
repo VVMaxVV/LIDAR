@@ -5,12 +5,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.onClick
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -35,7 +37,10 @@ internal class MiniMapFragment(
         val requester = remember { FocusRequester() }
         refreshContentCanvasViewModel.addFocus(requester)
         LaunchedEffect(Unit) { requester.requestFocus() }
-        Box(Modifier.padding(16.dp)) {
+        Box(
+            Modifier.fillMaxWidth().padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
             Canvas(
                 Modifier.size(400.dp).background(Color.Black)
                     .focusRequester(requester)
@@ -50,10 +55,10 @@ internal class MiniMapFragment(
                     }
             ) {
                 drawObstacles()
-                drawCurrentPosition()
-                drawGoalPoint()
                 drawRays()
                 drawTrajectory()
+                drawGoalPoint()
+                drawCurrentPosition()
             }
         }
     }
@@ -80,7 +85,7 @@ internal class MiniMapFragment(
     private fun DrawScope.drawRays() {
         miniMapViewModel.apply {
             fetchRays()
-            ratListState.value.forEach {
+            rayListState.value.forEach {
                 drawLine(Color.White, it.start, it.end, 0.15f)
             }
         }
@@ -88,10 +93,12 @@ internal class MiniMapFragment(
     }
 
     private fun DrawScope.drawTrajectory() {
-        miniMapViewModel.trajectory.value.map {
-            Offset(it.x.toFloat(), it.y.toFloat())
-        }.also {
-            drawPoints(it, PointMode.Polygon, Color.Blue, 1f)
+        if (miniMapViewModel.isTrajectoryVisible.value) {
+            miniMapViewModel.trajectory.value.map {
+                Offset(it.x.toFloat(), it.y.toFloat())
+            }.also {
+                drawPoints(it, PointMode.Polygon, Color.Blue, 1f)
+            }
         }
     }
 }

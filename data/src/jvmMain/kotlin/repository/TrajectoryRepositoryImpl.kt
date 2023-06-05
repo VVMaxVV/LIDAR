@@ -6,12 +6,17 @@ import model.Point
 import util.LimitedSizeList
 
 internal class TrajectoryRepositoryImpl : TrajectoryRepository {
-    private val trajectoryState = mutableStateOf<List<Point>>(emptyList())
-    private val trajectoryList: LimitedSizeList<Point> = LimitedSizeList(100)
+    private val trajectoryState = mutableStateOf<LimitedSizeList<Point>>(LimitedSizeList(255))
+
     override fun addPoint(point: Point) {
-        trajectoryList.add(point)
-        trajectoryState.value = trajectoryList.getAll()
+        trajectoryState.value = trajectoryState.value.also {
+            it.add(point)
+        }
     }
 
     override fun getTrajectory(): State<List<Point>> = trajectoryState
+
+    override fun clearTrajectory() {
+        trajectoryState.value.clear()
+    }
 }
