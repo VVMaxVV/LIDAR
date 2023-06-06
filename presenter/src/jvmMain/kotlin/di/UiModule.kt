@@ -16,5 +16,5 @@ internal val uiModule = module {
     single { MiniMapFragment(get(), get(), get()) }
     single { MenuControlFragment(get(), get(), get()) }
     single { ToastNotification(get()) }
-    single { MiniMapMenuFragment(get(), get()) }
+    single { MiniMapMenuFragment(get(), get(), get(), get()) }
 }

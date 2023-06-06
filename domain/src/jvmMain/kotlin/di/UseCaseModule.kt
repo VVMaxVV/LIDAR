@@ -19,6 +19,7 @@ import useCase.MoveToGoalUseCase
 import useCase.MoveUseCase
 import useCase.SetCurrentPositionUseCase
 import useCase.SetGoalPointUseCase
+import useCase.SetSampleLocationUseCase
 import useCase.SetupRayTracingConfigurationUseCase
 import useCase.impl.AddSeenPointUseCaseImpl
 import useCase.impl.ClearTrajectoryUseCaseImpl
@@ -38,6 +39,7 @@ import useCase.impl.MoveToGoalUseCaseImpl
 import useCase.impl.MoveUseCaseImpl
 import useCase.impl.SetCurrentPositionUseCaseImpl
 import useCase.impl.SetGoalPointUseCaseImpl
+import useCase.impl.SetSampleLocationUseCaseImpl
 import useCase.impl.SetupRayTracingConfigurationUseCaseImpl
 
 internal val useCaseModule = module {
@@ -60,4 +62,5 @@ internal val useCaseModule = module {
     single<GetRaysOnPlaneUseCase> { GetRaysOnPlaneUseCaseImpl(get()) }
     single<GetTrajectoryUseCase> { GetTrajectoryUseCaseImpl(get()) }
     single<ClearTrajectoryUseCase> { ClearTrajectoryUseCaseImpl(get()) }
+    single<SetSampleLocationUseCase> { SetSampleLocationUseCaseImpl(get(), get()) }
 }

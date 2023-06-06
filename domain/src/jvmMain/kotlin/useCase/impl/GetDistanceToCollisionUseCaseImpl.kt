@@ -1,7 +1,7 @@
 package useCase.impl
 
 import kotlinx.coroutines.flow.SharedFlow
-import model.DistanceToCollision
+import model.sealedClass.DistanceToCollision
 import repository.LidarDataRepository
 import useCase.GetDistanceToCollisionUseCase
 

@@ -10,19 +10,19 @@ import kotlinx.coroutines.flow.StateFlow
 import mapper.OffsetMapper
 import mapper.PointMapper
 import model.AABBBox
-import model.DistanceToCollision
 import model.Line
 import model.Point
 import model.Position
 import model.Ray
 import model.RayTracingConfiguration
+import model.sealedClass.DistanceToCollision
 import util.compareTo
 import util.div
 import util.getPointIntersectionOfLines
 import util.minus
 
 internal class LidarDataRepositoryImpl(
-    private val obstacleRepositoryImpl: ObstaclesRepository,
+    private val obstacleRepository: ObstaclesRepository,
     private val raysFactory: RaysFactory,
     private val pointMapper: PointMapper,
     private val offsetMapper: OffsetMapper
@@ -66,7 +66,7 @@ internal class LidarDataRepositoryImpl(
                     )
             }
             aabbBox?.let { box ->
-                val obstacleList = obstacleRepositoryImpl.getLinesWithinPoints(box.firstPoint, box.secondPoint)
+                val obstacleList = obstacleRepository.getLinesWithinPoints(box.firstPoint, box.secondPoint)
                 listPointInterception.clear()
                 raysFactory.get(
                     RayTracingConfiguration(

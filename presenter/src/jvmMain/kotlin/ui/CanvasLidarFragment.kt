@@ -43,8 +43,8 @@ import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayoutScope
 import androidx.constraintlayout.compose.Dimension
-import model.Movements
 import model.Position
+import model.sealedClass.Movements
 import util.consts.DefaultValues
 import util.div
 import util.getX

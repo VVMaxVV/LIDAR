@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import model.Movements
+import model.sealedClass.Movements
 import useCase.MoveToGoalUseCase
 import useCase.MoveUseCase
 
