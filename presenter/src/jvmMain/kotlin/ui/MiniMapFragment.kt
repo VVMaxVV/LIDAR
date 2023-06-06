@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import viewModel.MiniMapViewModel
@@ -54,11 +55,13 @@ internal class MiniMapFragment(
                         rotationX = 180f
                     }
             ) {
-                drawObstacles()
-                drawRays()
-                drawTrajectory()
-                drawGoalPoint()
-                drawCurrentPosition()
+                clipRect(-50f, -50f, 50f, 50f) {
+                    drawObstacles()
+                    drawRays()
+                    drawTrajectory()
+                    drawGoalPoint()
+                    drawCurrentPosition()
+                }
             }
         }
     }
