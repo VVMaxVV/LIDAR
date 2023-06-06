@@ -1,8 +1,8 @@
 package mapper
 
 import androidx.compose.ui.geometry.Offset
-import model.DistanceToCollision
 import model.RayTracingConfiguration
+import model.sealedClass.DistanceToCollision
 import util.compareTo
 import util.div
 import util.getX

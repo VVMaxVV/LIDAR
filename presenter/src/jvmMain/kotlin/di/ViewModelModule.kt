@@ -2,6 +2,7 @@ package di
 
 import org.koin.dsl.module
 import viewModel.ControllerMovementsViewModel
+import viewModel.LocationViewModel
 import viewModel.MiniMapViewModel
 import viewModel.NavigationViewModel
 import viewModel.RayCalculationViewModel
@@ -15,4 +16,5 @@ internal val viewModelModule = module {
     single { MiniMapViewModel(get(), get(), get(), get()) }
     single { NavigationViewModel(get(), get(), get(), get()) }
     single { ToastViewModel() }
+    single { LocationViewModel(get()) }
 }

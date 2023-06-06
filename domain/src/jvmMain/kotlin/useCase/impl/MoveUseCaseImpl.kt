@@ -1,8 +1,8 @@
 package useCase.impl
 
 import exception.CurrentPositionNotDefinedException
-import model.Movements
 import model.Point
+import model.sealedClass.Movements
 import repository.CurrentPositionRepository
 import repository.TrajectoryRepository
 import useCase.IsMovePossibleUseCase

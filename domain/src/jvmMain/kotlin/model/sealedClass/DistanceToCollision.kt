@@ -1,4 +1,4 @@
-package model
+package model.sealedClass
 
 sealed class DistanceToCollision {
     object OutOfBound : DistanceToCollision()

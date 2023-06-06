@@ -4,9 +4,9 @@ import exception.CurrentPositionNotDefinedException
 import exception.GoalPointNotDefinedException
 import exception.PathNotExistException
 import kotlinx.coroutines.delay
-import model.Movements
 import model.Position
 import model.TiltAngle
+import model.sealedClass.Movements
 import repository.CurrentPositionRepository
 import repository.GoalPointRepository
 import useCase.GetPathUseCase

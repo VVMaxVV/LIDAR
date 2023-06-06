@@ -1,6 +1,6 @@
 package useCase
 
-import model.Movements
+import model.sealedClass.Movements
 
 interface MoveUseCase {
     suspend fun execute(movements: Movements)
