@@ -58,7 +58,7 @@ internal class LidarParametersFragment(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = COUNTER_ITEM_VERTICAL_PADDING.dp)
             ) {
-                Text("Number of rays", Modifier.weight(1f), maxLines = COUNTER_DESCRIPTION_MAX_LINE)
+                Text("Number of sectors", Modifier.weight(1f), maxLines = COUNTER_DESCRIPTION_MAX_LINE)
                 Counter(
                     startValue = DefaultValues.DEFAULT_NUMBER_OF_RAYS,
                     minValue = NUM_RAY_COUNTER_MIN_VALUE,
@@ -118,7 +118,7 @@ internal class LidarParametersFragment(
             }
             Button(onClick = {
                 rayCalculationViewModel.setupConfiguration(
-                    numberOfRays.toInt(),
+                    numberOfRays.toInt() + 1,
                     fovCounter,
                     measuredRayLength,
                     visibleRayLength

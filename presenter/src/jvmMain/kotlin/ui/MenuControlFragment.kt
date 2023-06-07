@@ -115,6 +115,9 @@ internal class MenuControlFragment(
             if (!isGoalFieldCoordinatesXError && !isGoalFieldCoordinatesYError) {
                 navigationViewModel.setGoalCoordinates(Point(goalCoordinateX.toInt(), goalCoordinateY.toInt()))
             }
+            else {
+                toastViewModel.showToast("Incorrect goal coordinate")
+            }
         }) {
             Text("Set goal by coordinate", Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
