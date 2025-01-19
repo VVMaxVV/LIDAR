@@ -35,6 +35,9 @@ kotlin {
                 implementation(project(":data"))
                 implementation(project(":domain"))
                 implementation(project(":presenter"))
+
+                implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+                implementation("io.github.woody230.ktx:compose-constraint-layout:5.0.0")
             }
         }
         val jvmTest by getting
