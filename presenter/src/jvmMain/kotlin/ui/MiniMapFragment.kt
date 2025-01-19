@@ -48,14 +48,14 @@ internal class MiniMapFragment(
                     .focusable()
                     .onClick { requester.requestFocus() }
                     .graphicsLayer {
-                        translationX = 800f
-                        translationY = 800f
-                        scaleX = 4f
-                        scaleY = 4f
+                        translationX = SCALE_FACTOR * 200f
+                        translationY = SCALE_FACTOR * 200f
+                        scaleX = SCALE_FACTOR
+                        scaleY = SCALE_FACTOR
                         rotationX = 180f
                     }
             ) {
-                clipRect(-50f, -50f, 50f, 50f) {
+                clipRect(-200 / SCALE_FACTOR, -200 / SCALE_FACTOR, 200 / SCALE_FACTOR, 200 / SCALE_FACTOR) {
                     drawObstacles()
                     drawRays()
                     drawTrajectory()
@@ -90,6 +90,7 @@ internal class MiniMapFragment(
             fetchRays()
             rayListState.value.forEach {
                 drawLine(Color.White, it.start, it.end, 0.15f)
+                println("Ray: start ${it.start}, end: ${it.end}")
             }
         }
         miniMapViewModel.fetchRays()
@@ -103,5 +104,9 @@ internal class MiniMapFragment(
                 drawPoints(it, PointMode.Polygon, Color.Blue, 1f)
             }
         }
+    }
+
+    companion object {
+        const val SCALE_FACTOR = 2F
     }
 }

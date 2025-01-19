@@ -7,7 +7,7 @@ import kotlin.math.roundToInt
 import model.GridSpace
 import model.Point
 
-private const val ARRAY_SIZE = 100
+private const val ARRAY_SIZE = 200
 
 internal class PathRepositoryImpl(
     private val pathFactory: PathFactory
@@ -27,7 +27,7 @@ internal class PathRepositoryImpl(
     override suspend fun addObstacle(list: List<Point>) {
         val tempList = list.toList()
         tempList.forEach {
-            patencyArray[it.x.toFloat().roundToInt() + 49][it.y.toFloat().roundToInt() + 49] = false
+            patencyArray[it.x.toFloat().roundToInt() + (ARRAY_SIZE / 2 - 1)][it.y.toFloat().roundToInt() + (ARRAY_SIZE / 2 - 1)] = false
         }
     }
 

@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import model.LineByOffset
 import model.Ray
+import ui.MiniMapFragment.Companion.SCALE_FACTOR
 import useCase.ClearTrajectoryUseCase
 import useCase.GetObstaclesAroundUseCase
 import useCase.GetRaysOnPlaneUseCase
@@ -31,7 +32,7 @@ internal class MiniMapViewModel(
 
     fun fetchObstacles() {
         CoroutineScope(Dispatchers.Default).launch {
-            _obstaclesList.value = getObstaclesAroundUseCase.execute(50)
+            _obstaclesList.value = getObstaclesAroundUseCase.execute(200 / SCALE_FACTOR.toInt() * 2)
         }
     }
 

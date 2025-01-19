@@ -348,16 +348,16 @@ internal class CanvasLidarFragment(
     @Composable
     private fun ConstraintLayoutScope.handleErrorMessage() {
         rayCalculationViewModel.errorText.value?.let {
-            Text(
-                text = it,
-                modifier = Modifier.constrainAs(errorMessageReference) {
-                    top.linkTo(canvasReference.top, margin = ERROR_MESSAGE_MARGIN.dp)
-                    end.linkTo(canvasReference.end, margin = ERROR_MESSAGE_MARGIN.dp)
-                    bottom.linkTo(canvasReference.bottom, margin = ERROR_MESSAGE_MARGIN.dp)
-                    start.linkTo(canvasReference.start, margin = ERROR_MESSAGE_MARGIN.dp)
-                },
-                color = Color.Red
-            )
+//            Text(
+//                text = it,
+//                modifier = Modifier.constrainAs(errorMessageReference) {
+//                    top.linkTo(canvasReference.top, margin = ERROR_MESSAGE_MARGIN.dp)
+//                    end.linkTo(canvasReference.end, margin = ERROR_MESSAGE_MARGIN.dp)
+//                    bottom.linkTo(canvasReference.bottom, margin = ERROR_MESSAGE_MARGIN.dp)
+//                    start.linkTo(canvasReference.start, margin = ERROR_MESSAGE_MARGIN.dp)
+//                },
+//                color = Color.Red
+//            )
         }
     }
 }
