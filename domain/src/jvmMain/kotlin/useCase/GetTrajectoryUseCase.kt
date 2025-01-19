@@ -1,8 +1,8 @@
 package useCase
 
-import androidx.compose.runtime.State
+import kotlinx.coroutines.flow.StateFlow
 import model.Point
 
 interface GetTrajectoryUseCase {
-    fun execute(): State<List<Point>>
+    fun execute(): StateFlow<List<Point>>
 }
