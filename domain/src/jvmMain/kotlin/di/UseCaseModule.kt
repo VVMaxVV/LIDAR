@@ -10,6 +10,7 @@ import useCase.GetGoalPointUseCase
 import useCase.GetNearestObstaclesUseCase
 import useCase.GetObstaclesAroundUseCase
 import useCase.GetPathUseCase
+import useCase.GetPlanedTrajectoryUseCase
 import useCase.GetPointInterceptionUseCase
 import useCase.GetRaysOnPlaneUseCase
 import useCase.GetTrajectoryUseCase
@@ -31,6 +32,7 @@ import useCase.impl.GetLidarUiRaysUseCaseImpl
 import useCase.impl.GetNearestObstaclesUseCaseImpl
 import useCase.impl.GetObstaclesAroundUseCaseImpl
 import useCase.impl.GetPathUseCaseImpl
+import useCase.impl.GetPlanedTrajectoryUseCaseImpl
 import useCase.impl.GetPointInterceptionUseCaseImpl
 import useCase.impl.GetRaysOnPlaneUseCaseImpl
 import useCase.impl.GetTrajectoryUseCaseImpl
@@ -63,4 +65,5 @@ internal val useCaseModule = module {
     single<GetTrajectoryUseCase> { GetTrajectoryUseCaseImpl(get()) }
     single<ClearTrajectoryUseCase> { ClearTrajectoryUseCaseImpl(get()) }
     single<SetSampleLocationUseCase> { SetSampleLocationUseCaseImpl(get(), get()) }
+    single<GetPlanedTrajectoryUseCase> { GetPlanedTrajectoryUseCaseImpl(get()) }
 }

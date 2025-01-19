@@ -4,6 +4,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import factory.PathFactory
 import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import model.GridSpace
 import model.Point
 
@@ -16,12 +18,16 @@ internal class PathRepositoryImpl(
 
     private val goalPoint = mutableStateOf<Point?>(null)
 
+    private val lastGeneratedPath = MutableStateFlow<List<Point>>(emptyList())
+
     override suspend fun getPath(start: Point, goal: Point) = pathFactory.get(
         start = Point(start.x.toDouble() + ARRAY_SIZE / 2 - 1, start.y.toDouble() + ARRAY_SIZE / 2 - 1),
         goal = Point(goal.x.toDouble() + ARRAY_SIZE / 2 - 1, goal.y.toDouble() + ARRAY_SIZE / 2 - 1),
         space = GridSpace(patencyArray)
     ).map {
         Point(it.x.toDouble() - ARRAY_SIZE / 2 + 1, it.y.toDouble() - ARRAY_SIZE / 2 + 1)
+    }.also {
+        lastGeneratedPath.value = it
     }
 
     override suspend fun addObstacle(list: List<Point>) {
@@ -40,4 +46,6 @@ internal class PathRepositoryImpl(
     }
 
     override fun getGoalPoint(): State<Point?> = goalPoint
+
+    override fun getStoredPath(): StateFlow<List<Point>> = lastGeneratedPath
 }

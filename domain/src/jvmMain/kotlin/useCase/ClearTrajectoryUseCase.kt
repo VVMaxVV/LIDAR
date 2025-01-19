@@ -1,5 +1,5 @@
 package useCase
 
 interface ClearTrajectoryUseCase {
-    fun execute()
+    suspend fun execute()
 }

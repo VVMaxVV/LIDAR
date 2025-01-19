@@ -8,6 +8,7 @@ import di.presenterModule
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.get
 import ui.MainWindow
+import ui.PlannedTrajectoryScreen
 
 private const val WINDOW_WIDTH = 1920
 private const val WINDOW_HEIGHT = 700
@@ -20,6 +21,12 @@ fun main() = application {
     ) {
         (get(MainWindow::class.java) as MainWindow).start()
     }
+//    Window(
+//        onCloseRequest = ::exitApplication,
+//        state = WindowState(width = 500.dp, height = 500.dp)
+//    ) {
+//        PlannedTrajectoryScreen()
+//    }
 }
 
 private fun uploadModules() {

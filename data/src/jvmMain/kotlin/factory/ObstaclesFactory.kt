@@ -112,7 +112,7 @@ internal class ObstaclesFactory {
                     ),
                     Line(
                         Point(10, 65),
-                        Point(10, -10)
+                        Point(10, -11)
                     ),
                     Line(
                         Point(10, 60),

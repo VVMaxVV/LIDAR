@@ -61,6 +61,7 @@ internal class MiniMapFragment(
                     drawTrajectory()
                     drawGoalPoint()
                     drawCurrentPosition()
+                    drawPlannedTrajectory()
                 }
             }
         }
@@ -102,6 +103,16 @@ internal class MiniMapFragment(
                 Offset(it.x.toFloat(), it.y.toFloat())
             }.also {
                 drawPoints(it, PointMode.Polygon, Color.Blue, 1f)
+            }
+        }
+    }
+
+    private fun DrawScope.drawPlannedTrajectory() {
+        if (miniMapViewModel.isPlannedTrajectoryVisible.value) {
+            miniMapViewModel.plannedTrajectory.value.map {
+                Offset(it.x.toFloat(), it.y.toFloat())
+            }.also {
+                drawPoints(it, PointMode.Polygon, Color.Yellow, 1f)
             }
         }
     }

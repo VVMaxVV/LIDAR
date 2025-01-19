@@ -10,6 +10,7 @@ import model.Ray
 import ui.MiniMapFragment.Companion.SCALE_FACTOR
 import useCase.ClearTrajectoryUseCase
 import useCase.GetObstaclesAroundUseCase
+import useCase.GetPlanedTrajectoryUseCase
 import useCase.GetRaysOnPlaneUseCase
 import useCase.GetTrajectoryUseCase
 
@@ -17,6 +18,7 @@ internal class MiniMapViewModel(
     private val getObstaclesAroundUseCase: GetObstaclesAroundUseCase,
     private val getRaysOnPlaneUseCase: GetRaysOnPlaneUseCase,
     getTrajectoryUseCase: GetTrajectoryUseCase,
+    getPlanedTrajectoryUseCase: GetPlanedTrajectoryUseCase,
     private val clearTrajectoryUseCase: ClearTrajectoryUseCase
 ) {
     private var _obstaclesList = mutableStateOf<List<LineByOffset>>(emptyList())
@@ -26,9 +28,13 @@ internal class MiniMapViewModel(
     val rayListState: State<List<Ray>> get() = _rayListState
 
     val trajectory = getTrajectoryUseCase.execute()
+    val plannedTrajectory = getPlanedTrajectoryUseCase.execute()
 
     private val _isTrajectoryVisible = mutableStateOf(true)
     val isTrajectoryVisible: State<Boolean> get() = _isTrajectoryVisible
+
+    private val _isPlannedTrajectoryVisible = mutableStateOf(true)
+    val isPlannedTrajectoryVisible: State<Boolean> get() = _isPlannedTrajectoryVisible
 
     fun fetchObstacles() {
         CoroutineScope(Dispatchers.Default).launch {
@@ -49,6 +55,8 @@ internal class MiniMapViewModel(
     }
 
     fun cleanTrajectory() {
-        clearTrajectoryUseCase.execute()
+        CoroutineScope(Dispatchers.IO).launch {
+            clearTrajectoryUseCase.execute()
+        }
     }
 }
