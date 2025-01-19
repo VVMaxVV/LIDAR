@@ -91,7 +91,6 @@ private fun DrawScope.drawRays(miniMapViewModel: MiniMapViewModel) {
         fetchRays()
         rayListState.value.forEach {
             drawLine(Color.White, it.start, it.end, 0.15f)
-            println("Ray: start ${it.start}, end: ${it.end}")
         }
     }
     miniMapViewModel.fetchRays()
